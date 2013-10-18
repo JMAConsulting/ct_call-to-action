@@ -1,0 +1,166 @@
+<?php
+
+function campaigntool_menu() {
+  $items = array();
+
+  $items['call-to-action-entry'] = array(
+    'title' => 'Enter an Action', 
+    'description' => 'Use this form to enter in various calls to action (Events, Petitions or Subscriptions)',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('campaigntool_form'), 
+    'access callback' => TRUE
+  );
+
+  return $items;
+}
+
+function campaigntool_form($form, &$form_state) {
+
+  $options = array(
+    'event' => 'Event',
+    'petition' => 'Petition',
+    'subscription' => 'Subscription',
+  );
+
+   $form['action_type'] = array(
+    '#type' => 'select',
+    '#title' => 'Type of Action?',
+    '#required' => TRUE,
+    '#options' => $options,
+  );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Title',
+    '#required' => TRUE, 
+  );
+  $form['summary'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Summary',
+    '#required' => TRUE, 
+  );
+  $form['description'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Description',
+    '#required' => TRUE, 
+  );
+  $form['link'] = array(
+    '#type' => 'textfield',
+    '#title' => 'More Link text',
+    '#required' => TRUE,
+  );
+
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    );
+  
+  return $form;
+}
+
+function campaigntool_form_submit($form, &$form_state) {
+
+  civicrm_initialize();
+  $params['type'] = $form_state['values']['action_type'];
+  $fieldArray = array(
+    1 => $form_state['values']['title'], //Title
+    2 => $form_state['values']['summary'], //Summary
+    3 => $form_state['values']['description'], //Description
+    4 => $form_state['values']['link'], //More Link Name
+  );
+  $gid = 14;
+  $profile = CRM_Core_BAO_UFGroup::copy($gid);
+  $profile->title = $fieldArray[1];
+  $profile->save();
+  $ufjoinId = $ufjointable = NULL;
+  $query = "DELETE FROM civicrm_uf_join
+WHERE uf_group_id = {$profile->id} AND module != 'Profile'";
+  CRM_Core_DAO::executeQuery($query);
+  $save = new CRM_Core_DAO_UFField();
+   
+  $query = "SELECT id, weight FROM civicrm_uf_field WHERE uf_group_id = $profile->id
+AND field_type = 'Formatting'";
+  $ufField = CRM_Core_DAO::executeQuery($query);
+  while ($ufField->fetch()) {
+    $save->id = $ufField->id;
+    $save->help_pre = $fieldArray[$ufField->weight];
+    $save->save();
+  }
+  switch ($params['type']) {
+
+    case 'event':
+      $params = array(
+        'title' => $fieldArray[1],
+        'summary' => $fieldArray[2],
+        'description' => $fieldArray[3],
+        'event_type_id' => 1,
+        'start_date' => date('Ymd'),
+        'is_public' => 1,
+        'is_online_registration' => 1,
+        'is_monetary' => 0,
+        'is_active' => 1,
+        'version' => 3,
+      );
+ 
+      $result = civicrm_api('event', 'create', $params);
+      $ufjoinId = $result['id'];
+      $ufjointable = 'civicrm_event';
+      $ufjoinmodule = 'CiviEvent';
+      break;
+    case 'petition':
+      $params = array(
+        'version' => 3,
+        'title' => $fieldArray[1],
+        'activity_type_id' => '32',
+        'instructions' => $fieldArray[3],
+      );
+ 
+      $result = civicrm_api('survey', 'create' ,$params);
+      $ufjoinId = $result['id'];
+      $ufjointable = 'civicrm_survey';
+      $ufjoinmodule = 'CiviCampaign';
+      break;
+  }
+  if ($ufjoinId && $ufjointable && $ufjoinmodule) {
+    $params = array(
+      'module' => $ufjoinmodule,
+      'entity_table' => $ufjointable,
+      'entity_id' => $ufjoinId,
+      'weight' => 2,
+      'uf_group_id' => $profile->id,
+      'is_active' => 1,
+      'version' => 3,
+      'sequential' => 1,
+    );
+ 
+    civicrm_api('uf_join', 'create', $params);
+  }
+  drupal_set_message('Action saved successfully!');
+}
+
+function campaigntool_civicrm_buildForm($formName, &$form) { 
+  
+  if ($formName == "CRM_Profile_Form_Edit" || 
+    $formName == "CRM_Event_Form_Registration_Register"|| 
+    $formName == "CRM_Campaign_Form_Petition_Signature") {
+    CRM_Core_Region::instance('page-body')->add(array(
+       'template' => 'CRM/Extra/ModifyTpl.tpl',
+    ));
+    
+    switch ($formName) {
+      case "CRM_Profile_Form_Edit":
+        $afterDivname = '#crm-profile-block';
+        $eachDivName = '#crm-profile-block';
+        break;
+      case "CRM_Event_Form_Registration_Register":
+        $afterDivname = '#billing-payment-block';
+        $eachDivName = '.crm-profile';
+        break;
+      case "CRM_Campaign_Form_Petition_Signature":
+        $afterDivname = '.crm-petition-activity-profile';
+        $eachDivName = '.crm-petition-contact-profile';
+        break;
+    }
+    $form->assign('afterdiv', $afterDivname);
+    $form->assign('eachdiv', $eachDivName);
+  } 
+}
