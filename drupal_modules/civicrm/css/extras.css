@@ -1,0 +1,92 @@
+/* $Id$ */
+
+/*
+** Put your local CSS modifications in this file
+** if you don't want to modify system provided
+** civicrm.css.
+*/
+
+/*petition*/
+.page-civicrm-profile-create h1.title, .page-civicrm-petition-sign h1.title, .page-civicrm-event-register h1.title, .page-civicrm-profile-create #rightColumnContainer, #crm-container .morelink, .newDiv .crm-submit-buttons .crm-button-type-cancel {
+	display:none !important;
+}
+body.page-civicrm-profile-create.rightColumn #content, body.page-civicrm-petition-sign #content, body.page-civicrm-event-register #content {
+    width: 990px !important;
+}
+.page-civicrm-profile-create #crm-profile-block, .page-civicrm-petition-sign .crm-petition-contact-profile, .page-civicrm-event-register .crm-profile {
+    border: 0 none !important;
+    float: left;
+    width: 656px;
+}
+.page-civicrm-profile-create #crm-profile-block .title span, .page-civicrm-petition-sign .crm-petition-contact-profile .title span, .page-civicrm-event-register .crm-profile .title span {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 48px;
+	font-weight: normal;
+	line-height: 1.1em;
+}
+.summaryp, .descriptionp {
+	margin-bottom: 5px;
+	font-size: 18px;
+	line-height: 1.5em;
+	margin-right: 24px;
+	margin-left: 24px;
+}
+.newDiv {
+	float: left;
+	width: 322px;
+	margin: 0px 0px 0px 12px;
+	padding: 10px 0px 0px 0px;
+}
+.newDiv .crm-section input
+{
+	width: 235px;
+	margin: 0px;
+	padding: 12px !important;
+	color: #585858;
+	background: #ffffff;
+	border: 1px solid #b6b6b6;
+	-moz-border-radius: 4px 4px 4px 4px !important;
+	-webkit-border-radius: 4px 4px 4px 4px !important;
+	border-radius: 4px 4px 4px 4px !important;
+	-o-border-radius: 4px 4px 4px 4px !important;
+	-ms-border-radius: 4px 4px 4px 4px !important;
+}
+.newDiv .crm-section {
+	margin-bottom: 24px !important;
+	padding:0px;
+}
+.newDiv .crm-submit-buttons .form-submit {
+	width: 260px !important;
+	font-size:18px !important;
+	margin: 0px !important;
+	padding: 12px !important;
+	color: #ffffff !important;
+	background: #79a814 !important;
+	background-image: -moz-linear-gradient(bottom, #79a814 0%, #95c00f 100%) !important;
+	background-image: -ms-linear-gradient(bottom, #79a814 0%, #95c00f 100%) !important;
+	background-image: -o-linear-gradient(bottom, #79a814 0%, #95c00f 100%) !important;
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #95c00f), color-stop(1, #79a814)) !important;
+	background-image: -webkit-linear-gradient(bottom, #79a814 0%, #95c00f 100%) !important;
+	background-image: linear-gradient(bottom, #79a814 0%, #95c00f 100%) !important;
+	border: 2px solid #95c00f !important;
+	-moz-border-radius: 4px 4px 4px 4px !important;
+	-webkit-border-radius: 4px 4px 4px 4px !important;
+	border-radius: 4px 4px 4px 4px !important;
+	-moz-box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+	-moz-text-shadow: 0px 2px 3px #40590b !important;
+	-webkit-text-shadow: 0px 2px 3px #40590b !important;
+	text-shadow: 0px 2px 3px #40590b !important;
+}
+.newDiv .crm-submit-buttons span {
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 none !important;
+    margin-left: 59px !important;
+}
+.page-civicrm-petition-sign .crm-petition-contact-profile .label, .page-civicrm-petition-sign .crm-petition-contact-profile .content,  .page-civicrm-event-register .crm-profile legend {
+	display:none !important;
+}
+/*end petition*/
+
