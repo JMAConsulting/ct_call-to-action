@@ -105,6 +105,7 @@ AND field_type = 'Formatting'";
       $ufjoinId = $result['id'];
       $ufjointable = 'civicrm_event';
       $ufjoinmodule = 'CiviEvent';
+      $weight = 1;
       break;
     case 'petition':
       $params = array(
@@ -118,6 +119,18 @@ AND field_type = 'Formatting'";
       $ufjoinId = $result['id'];
       $ufjointable = 'civicrm_survey';
       $ufjoinmodule = 'CiviCampaign';
+      $weight = 2;
+      break;
+    case 'subscription':
+      $params = array( 
+        'version' => 3,
+        'title' => $fieldArray[1],
+        'visibility' => 'User and User Admin Only',
+        'is_active' => 1,
+        'group_type' => array(2 => 1),
+      );
+      $result = civicrm_api('group', 'create', $params);
+      CRM_Core_DAO::setFieldValue('CRM_Core_DAO_UFGroup', $profile->id, 'add_to_group_id', $result['id']);
       break;
   }
   if ($ufjoinId && $ufjointable && $ufjoinmodule) {
@@ -125,7 +138,7 @@ AND field_type = 'Formatting'";
       'module' => $ufjoinmodule,
       'entity_table' => $ufjointable,
       'entity_id' => $ufjoinId,
-      'weight' => 2,
+      'weight' => $weight,
       'uf_group_id' => $profile->id,
       'is_active' => 1,
       'version' => 3,
