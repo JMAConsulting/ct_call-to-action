@@ -177,3 +177,33 @@ function campaigntool_civicrm_buildForm($formName, &$form) {
     $form->assign('eachdiv', $eachDivName);
   } 
 }
+
+function campaigntool_civicrm_postprocess($formName, &$form) {
+  if ($formName == "CRM_Event_Form_Registration_Register") {
+    CRM_Utils_System::redirect(CRM_Utils_System::url('', "title={$form->_values['event']['title']}&context=event"));
+  }
+  if ($formName == "CRM_Campaign_Form_Petition_Signature") {
+    CRM_Utils_System::redirect(CRM_Utils_System::url('', "title={$form->petition['title']}&context=petition"));
+  }
+  if ($formName == "CRM_Profile_Form_Edit") {
+    CRM_Utils_System::redirect(CRM_Utils_System::url('', "id={$form->getVar('_gid')}&context=subscription"));
+  }
+}
+
+function campaigntool_node_view($node) {
+}
+
+
+function campaigntool_init() {
+  civicrm_initialize();
+  if (CRM_Utils_Request::retrieve('context', 'String') == 'event') {
+    drupal_set_message( t('Thank you for registering for '. CRM_Utils_Request::retrieve('title', 'String')) );
+  }
+  elseif (CRM_Utils_Request::retrieve('context', 'String') == 'petition') {
+    drupal_set_message( t('Thank you for signing '. CRM_Utils_Request::retrieve('title', 'String')) );
+  }
+  elseif (CRM_Utils_Request::retrieve('context', 'String') == 'subscription') {
+    $title = CRM_Core_BAO_UFGroup::getTitle(CRM_Utils_Request::retrieve('id', 'Integer'));
+    drupal_set_message( t('Thank you for subscribing to '. $title) );
+  }
+}
