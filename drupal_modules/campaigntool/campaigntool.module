@@ -282,6 +282,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   $form['link'] = array(
     '#type' => 'textfield',
     '#title' => 'More Link text',
+    '#default_value' => ' >> Learn More and Share',
     '#required' => TRUE,
   ); 
   $form['location_fieldset']['address_hidden'] = array(
@@ -448,9 +449,9 @@ AND field_type = 'Formatting'";
       // create or update loc block
       $locBlockParams = array(
         'id' => ($form_state['values']['location'] != 0) ? $form_state['values']['location'] : NULL,
-        'address_id' => $address->id,
-        'phone_id' => $phone->id,
-        'email_id' => $email->id,
+        'address_id' => isset($address->id) ? $address->id : NULL,
+        'phone_id' => isset($phone->id) ? $phone->id : NULL,
+        'email_id' => isset($email->id) ? $email->id : NULL,
         'version' => 3,
       );
       $locBlock = civicrm_api('loc_block', 'create', $locBlockParams);
