@@ -10,34 +10,162 @@ function campaigntool_menu() {
     'page arguments' => array('campaigntool_form'), 
     'access callback' => TRUE
   );
+  $items['call-to-action-delete/%'] = array(
+    'page callback' => 'campaigntool_cta_delete',
+    'page arguments' => array(1), 
+    'access callback' => TRUE
+  );
 
   return $items;
 }
 
-function campaigntool_form($form, &$form_state) {
+function campaigntool_cta_delete($action) {
+  civicrm_initialize();
+  $id = explode('-', $action);
+  if ($id[0] == 'event') {
+    $params = array(
+      'id' => $id[1],
+      'version' => 3,
+    );
+    $result = civicrm_api( 'event','delete',$params );
+  }
+  elseif($id[0] == 'petition') {
+    $params = array(
+      'id' => $id[1],
+      'version' => 3,
+    );
+    $result = civicrm_api( 'survey','delete',$params );
+  }
+  elseif($id[0] == 'profile') {
+    $params = array(
+      'id' => $id[1],
+      'version' => 3,
+    );
+    $result = civicrm_api( 'uf_group','delete',$params );
+  }
 
+  if ($result) {
+    echo 1;
+  }
+  CRM_Utils_System::civiExit();
+}
+
+function campaigntool_form($form, &$form_state) {
+  civicrm_initialize();
+  $locationEvents = CRM_Event_BAO_Event::getLocationEvents();
+  $locationEvents[0] = "-- select --";
+  ksort($locationEvents);
+  $stateProvince = CRM_Core_PseudoConstant::stateProvince();
+  $country = CRM_Core_PseudoConstant::country();
+  $locations = array(
+    1 => 'Create new location',
+    2 => 'Use Existing Location',
+  );
   $options = array(
     'event' => 'Event',
     'petition' => 'Petition',
     'subscription' => 'Subscription',
   );
-
-   $form['action_type'] = array(
+  $form['action_type'] = array(
     '#type' => 'select',
     '#title' => 'Type of Action?',
     '#required' => TRUE,
     '#options' => $options,
-  );
+  ); 
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => 'Title',
     '#required' => TRUE, 
-  );
+  ); 
   $form['summary'] = array(
     '#type' => 'textfield',
     '#title' => 'Summary',
     '#required' => TRUE, 
   );
+  $form['start_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => 'Event Start Date',
+    '#default_value' => date('Y-m-d'),
+    '#date_format' => 'Y-m-d g:i a',
+    '#date_label_position' => 'within',
+    '#date_increment' => 15,
+    '#date_year_range' => '0:+2',
+  );
+  $form['end_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => 'Event End Date',
+    '#default_value' => date('Y-m-d'),
+    '#date_format' => 'Y-m-d g:i a',
+    '#date_label_position' => 'within',
+    '#date_increment' => 15,
+    '#date_year_range' => '0:+2',
+  );
+  $form['location_fieldset'] = array(
+    '#title' => t("Event Location"),
+    '#prefix' => '<div id="address-wrapper">',
+    '#suffix' => '</div>',
+    '#type' => 'fieldset',
+  );
+  $form['location_fieldset']["location_type"] = array(
+    '#type' => 'radios',
+    '#title' => "Choose Location",
+    '#options' => $locations,
+    '#prefix' => '<div id="location-choice-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $form['location_fieldset']["location"] = array(
+      '#type' => 'select',
+      '#title' => "Use Location",
+      '#options' => $locationEvents,
+      '#prefix' => '<div id="location-choose-wrapper">',
+      '#suffix' => '</div>',
+      '#ajax' => array(
+        'callback' => 'address_fill_callback',
+        'wrapper' => 'address-wrapper',
+      ),
+    );
+  $form['location_fieldset']["street_address"] = array(
+      '#type' => 'textfield',
+      '#title' => "Street Address",
+    );
+  $form['location_fieldset']["add1_address"] = array(
+      '#type' => 'textfield',
+      '#title' => "Addt'l Address 1",
+    );
+  $form['location_fieldset']["add2_address"] = array(
+      '#type' => 'textfield',
+      '#title' => "Addt'l Address 2",
+    );
+  $form['location_fieldset']["city"] = array(
+      '#type' => 'textfield',
+      '#title' => "City",
+    );
+  $form['location_fieldset']["zip"] = array(
+      '#type' => 'textfield',
+      '#title' => "ZipCode",
+    );
+  $form['location_fieldset']["suffix"] = array(
+      '#type' => 'textfield',
+      '#title' => "Suffix",
+    );
+  $form['location_fieldset']["country"] = array(
+      '#type' => 'select',
+      '#title' => "City",
+      '#options' => $country,
+    );
+  $form['location_fieldset']["state"] = array(
+      '#type' => 'select',
+      '#title' => "State/Province",
+      '#options' => $stateProvince,
+    );
+  $form['location_fieldset']["email"] = array(
+      '#type' => 'textfield',
+      '#title' => "Email",
+    );
+  $form['location_fieldset']["phone"] = array(
+      '#type' => 'textfield',
+      '#title' => "Phone",
+    );
   $form['description'] = array(
     '#type' => 'textarea',
     '#title' => 'Description',
@@ -47,14 +175,56 @@ function campaigntool_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => 'More Link text',
     '#required' => TRUE,
+  ); 
+  $form['location_fieldset']['address_hidden'] = array(
+    '#type' => 'hidden',
+    '#title' => 'Address Hidden',
+  );
+  $form['location_fieldset']['email_hidden'] = array(
+    '#type' => 'hidden',
+    '#title' => 'Email Hidden',
+  );
+  $form['location_fieldset']['phone_hidden'] = array(
+    '#type' => 'hidden',
+    '#title' => 'Phone Hidden',
   );
 
   $form['submit_button'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
-    );
+  );
   
+  drupal_add_js(drupal_get_path('module', 'campaigntool') .'/campaigntool.js');
   return $form;
+}
+
+function address_fill_callback($form, &$form_state) {
+  $addressId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_LocBlock', $form_state['values']['location'], 'address_id');
+  $emailId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_LocBlock', $form_state['values']['location'], 'email_id');
+  $phoneId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_LocBlock', $form_state['values']['location'], 'phone_id');
+  $addressParams = array(
+    'id' => $addressId,
+    'version' => 3,
+  );
+  $address = civicrm_api('Address', 'get', $addressParams);
+  $addressParams['id'] = $emailId;
+  $email = civicrm_api('Email', 'get', $addressParams);
+  $addressParams['id'] = $phoneId;
+  $phone = civicrm_api('Phone', 'get', $addressParams);
+  $form['location_fieldset']["street_address"]['#value'] = $address['values'][$addressId]['street_address'];
+  $form['location_fieldset']["add1_address"]['#value'] = $address['values'][$addressId]['supplementary_address_1'];
+  $form['location_fieldset']["add2_address"]['#value'] = $address['values'][$addressId]['supplementary_address_2'];
+  $form['location_fieldset']["city"]['#value'] = $address['values'][$addressId]['city'];
+  $form['location_fieldset']["zip"]['#value'] = $address['values'][$addressId]['postal_code'];
+  $form['location_fieldset']["suffix"]['#value'] = $address['values'][$addressId]['postal_code_suffix'];
+  $form['location_fieldset']["country"]['#value'] = $address['values'][$addressId]['country_id'];
+  $form['location_fieldset']["state"]['#value'] = $address['values'][$addressId]['state_province_id'];
+  $form['location_fieldset']["email"]['#value'] = $email['values'][$emailId]['email'];
+  $form['location_fieldset']["phone"]['#value'] = $phone['values'][$phoneId]['phone'];
+  $form['location_fieldset']["address_hidden"]['#value'] = $addressId;
+  $form['location_fieldset']["phone_hidden"]['#value'] = $phoneId;
+  $form['location_fieldset']["email_hidden"]['#value'] = $emailId;
+  return $form['location_fieldset'];
 }
 
 function campaigntool_form_submit($form, &$form_state) {
@@ -76,7 +246,7 @@ function campaigntool_form_submit($form, &$form_state) {
 WHERE uf_group_id = {$profile->id} AND module != 'Profile'";
   CRM_Core_DAO::executeQuery($query);
   $save = new CRM_Core_DAO_UFField();
-   
+  
   $query = "SELECT id, weight FROM civicrm_uf_field WHERE uf_group_id = $profile->id
 AND field_type = 'Formatting'";
   $ufField = CRM_Core_DAO::executeQuery($query);
@@ -86,6 +256,9 @@ AND field_type = 'Formatting'";
     $save->save();
   }
   switch ($params['type']) {
+    case 'subscription':
+      $action = "Subscription";
+      break;
 
     case 'event':
       $params = array(
@@ -93,7 +266,9 @@ AND field_type = 'Formatting'";
         'summary' => $fieldArray[2],
         'description' => $fieldArray[3],
         'event_type_id' => 1,
-        'start_date' => date('Ymd'),
+        'start_date' => date($form_state['values']['start_date']),
+        'end_date' => date($form_state['values']['end_date']),
+        'loc_block_id' => ($form_state['values']['location'] != 0) ? $form_state['values']['location'] : NULL,
         'is_public' => 1,
         'is_online_registration' => 1,
         'is_monetary' => 0,
@@ -102,10 +277,69 @@ AND field_type = 'Formatting'";
       );
  
       $result = civicrm_api('event', 'create', $params);
+      // create or update the address
+      $addressParams = array( 
+        'location_type_id' => 1,
+        'street_address' => $form_state['values']['street_address'],
+        'supplemental_address_1' => $form_state['values']['add1_address'],
+        'supplemental_address_2' => $form_state['values']['add2_address'],
+        'postal_code' => $form_state['values']['zip'],
+        'postal_code_suffix' => $form_state['values']['suffix'],
+        'country_id' => $form_state['values']['country'],
+        'state_province_id' => $form_state['values']['state'],
+        'city' => $form_state['values']['city'],
+        'is_primary' => 1,
+        'version' => 3,
+      );
+      if ($form_state['values']['address_hidden']) {
+        $addressParams['id'] = $form_state['values']['address_hidden'];
+      }
+      $address = CRM_Core_BAO_Address::add($addressParams, TRUE);
+      if ($form_state['values']['phone']) {
+        $phoneParams = array(
+          'phone' => $form_state['values']['phone'], 
+          'location_type_id' => 1,
+          'is_primary' => 1,
+          'version' => 3,
+        );
+        if ($form_state['values']['phone_hidden']) {
+          $phoneParams['id'] = $form_state['values']['phone_hidden'];
+        }
+        $phone = CRM_Core_BAO_Phone::add($phoneParams);
+      }
+      $emailParams = array(
+        'email' => $form_state['values']['email'], 
+        'contact_id' => NULL,
+        'is_primary' => 1,
+        'location_type_id' => 1,
+        'version' => 3,
+      );
+      if ($form_state['values']['email_hidden']) {
+        $emailParams['id'] = $form_state['values']['email_hidden'];
+      }
+      $email = CRM_Core_BAO_Email::add($emailParams);
+      // create or update loc block
+      $locBlockParams = array(
+        'id' => ($form_state['values']['location'] != 0) ? $form_state['values']['location'] : NULL,
+        'address_id' => $address->id,
+        'phone_id' => $phone->id,
+        'email_id' => $email->id,
+        'version' => 3,
+      );
+      $locBlock = civicrm_api('loc_block', 'create', $locBlockParams);
+      // Update the event with the loc block if new address
+      if ($form_state['values']['location'] == 0) {
+        $eventParams = array(
+          'id' => $result['id'],
+          'loc_block_id' => $locBlock['id'],
+          'version' => 3,
+        );
+        $event = civicrm_api('event', 'create', $eventParams);
+      }
       $ufjoinId = $result['id'];
+      $action = "Event";
       $ufjointable = 'civicrm_event';
       $ufjoinmodule = 'CiviEvent';
-      $weight = 1;
       break;
     case 'petition':
       $params = array(
@@ -116,21 +350,10 @@ AND field_type = 'Formatting'";
       );
  
       $result = civicrm_api('survey', 'create' ,$params);
+      $action = "Petition";
       $ufjoinId = $result['id'];
       $ufjointable = 'civicrm_survey';
       $ufjoinmodule = 'CiviCampaign';
-      $weight = 2;
-      break;
-    case 'subscription':
-      $params = array( 
-        'version' => 3,
-        'title' => $fieldArray[1],
-        'visibility' => 'User and User Admin Only',
-        'is_active' => 1,
-        'group_type' => array(2 => 1),
-      );
-      $result = civicrm_api('group', 'create', $params);
-      CRM_Core_DAO::setFieldValue('CRM_Core_DAO_UFGroup', $profile->id, 'add_to_group_id', $result['id']);
       break;
   }
   if ($ufjoinId && $ufjointable && $ufjoinmodule) {
@@ -138,7 +361,7 @@ AND field_type = 'Formatting'";
       'module' => $ufjoinmodule,
       'entity_table' => $ufjointable,
       'entity_id' => $ufjoinId,
-      'weight' => $weight,
+      'weight' => 2,
       'uf_group_id' => $profile->id,
       'is_active' => 1,
       'version' => 3,
@@ -147,36 +370,8 @@ AND field_type = 'Formatting'";
  
     civicrm_api('uf_join', 'create', $params);
   }
-  drupal_set_message('Action saved successfully!');
 }
 
-function campaigntool_civicrm_buildForm($formName, &$form) { 
-  
-  if ($formName == "CRM_Profile_Form_Edit" || 
-    $formName == "CRM_Event_Form_Registration_Register"|| 
-    $formName == "CRM_Campaign_Form_Petition_Signature") {
-    CRM_Core_Region::instance('page-body')->add(array(
-       'template' => 'CRM/Extra/ModifyTpl.tpl',
-    ));
-    
-    switch ($formName) {
-      case "CRM_Profile_Form_Edit":
-        $afterDivname = '#crm-profile-block';
-        $eachDivName = '#crm-profile-block';
-        break;
-      case "CRM_Event_Form_Registration_Register":
-        $afterDivname = '#billing-payment-block';
-        $eachDivName = '.crm-profile';
-        break;
-      case "CRM_Campaign_Form_Petition_Signature":
-        $afterDivname = '.crm-petition-activity-profile';
-        $eachDivName = '.crm-petition-contact-profile';
-        break;
-    }
-    $form->assign('afterdiv', $afterDivname);
-    $form->assign('eachdiv', $eachDivName);
-  } 
-}
 
 function campaigntool_civicrm_postprocess($formName, &$form) {
   if ($formName == "CRM_Event_Form_Registration_Register") {
