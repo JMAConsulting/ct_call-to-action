@@ -7,7 +7,14 @@ function campaigntool_menu() {
     'title' => 'Enter an Action', 
     'description' => 'Use this form to enter in various calls to action (Events, Petitions or Subscriptions)',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('campaigntool_form'), 
+    'page arguments' => array('campaigntool_form', 1), 
+    'access callback' => TRUE
+  );
+  $items['call-to-action-entry/%'] = array(
+    'title' => 'Enter an Action', 
+    'description' => 'Use this form to enter in various calls to action (Events, Petitions or Subscriptions)',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('campaigntool_form', 1), 
     'access callback' => TRUE
   );
   $items['call-to-action-delete/%'] = array(
@@ -50,8 +57,93 @@ function campaigntool_cta_delete($action) {
   CRM_Utils_System::civiExit();
 }
 
-function campaigntool_form($form, &$form_state) {
+function campaigntool_form($form, &$form_state, $id = NULL) {
   civicrm_initialize();
+  // handling an update
+  if ($id) {
+    $actions = explode('-', $id);
+    switch($actions[0]) {
+      case 'event':
+        $params = array(
+          'id' => $actions[1],
+          'version' => 3,
+        );
+        $result = civicrm_api('event', 'get', $params);
+        $event = CRM_Utils_Array::value('id', $result);
+        $summary =  CRM_Utils_Array::value('summary', $result['values'][$actions[1]]);
+        $description = CRM_Utils_Array::value('description', $result['values'][$actions[1]]);
+        $start_date = CRM_Utils_Array::value('start_date', $result['values'][$actions[1]]);
+        $end_date = CRM_Utils_Array::value('end_date', $result['values'][$actions[1]]);
+        $event_type_id = CRM_Utils_Array::value('event_type_id', $result['values'][$actions[1]]);
+        $loc_block_id = CRM_Utils_Array::value('loc_block_id', $result['values'][$actions[1]]);
+        if ($loc_block_id) {
+          $locBlockParams = array(
+            'id' => $loc_block_id,
+            'version' => 3,
+          );
+          $locBlock = civicrm_api('loc_block', 'get', $locBlockParams);
+          // fetch the address
+          if (CRM_Utils_Array::value('address_id', $locBlock['values'][$loc_block_id])) {
+            $addressParams = array(
+              'id' => CRM_Utils_Array::value('address_id', $locBlock['values'][$loc_block_id]),
+              'version' => 3,
+            );
+            $address = civicrm_api('address', 'get', $addressParams);
+            $address_hidden = CRM_Utils_Array::value('id', $address);
+            $street_address = CRM_Utils_Array::value('street_address', $address['values'][$address['id']]);
+            $add1_address = CRM_Utils_Array::value('supplemental_address_1', $address['values'][$address['id']]);
+            $add2_address = CRM_Utils_Array::value('supplemental_address_2', $address['values'][$address['id']]);
+            $city = CRM_Utils_Array::value('city', $address['values'][$address['id']]);
+            $state = CRM_Utils_Array::value('state', $address['values'][$address['id']]);
+            $zip = CRM_Utils_Array::value('postal_code', $address['values'][$address['id']]);
+            $suffix = CRM_Utils_Array::value('postal_code_suffix', $address['values'][$address['id']]);
+            $country_val = CRM_Utils_Array::value('country_id', $address['values'][$address['id']]);
+          }
+          // fetch the phone
+          if (CRM_Utils_Array::value('phone_id', $locBlock['values'][$loc_block_id])) {
+            $phoneParams = array(
+              'id' => CRM_Utils_Array::value('phone_id', $locBlock['values'][$loc_block_id]),
+              'version' => 3,
+            );
+            $phone = civicrm_api('phone', 'get', $phoneParams);
+            $phone_hidden = CRM_Utils_Array::value('id', $phone);
+            $phone = CRM_Utils_Array::value('phone', $phone['values'][$phone['id']]);
+          }
+          // fetch the email
+          if (CRM_Utils_Array::value('email_id', $locBlock['values'][$loc_block_id])) {
+            $emailParams = array(
+              'id' => CRM_Utils_Array::value('email_id', $locBlock['values'][$loc_block_id]),
+              'version' => 3,
+            );
+            $email = civicrm_api('email', 'get', $emailParams);
+            $email_hidden = CRM_Utils_Array::value('id', $email);
+            $email = CRM_Utils_Array::value('email', $email['values'][$email['id']]);
+          }
+        }
+        break;
+
+      case 'petition': 
+        $params = array(
+          'id' => $actions[1],
+          'version' => 3,
+        );
+        $result = civicrm_api('survey', 'get', $params);
+        $summary = NULL;
+        $description = CRM_Utils_Array::value('instructions', $result['values'][$actions[1]]);
+        $petition = $actions[1];
+        break;
+
+      case 'profile':
+        $params = array(
+          'id' => $actions[1],
+          'version' => 3,
+        );
+        $result = civicrm_api('uf_group', 'get', $params);
+        $actions[0] = 'petition';
+        $profile = $actions[1];
+        break;
+    }
+  }
   $locationEvents = CRM_Event_BAO_Event::getLocationEvents();
   $locationEvents[0] = "-- select --";
   ksort($locationEvents);
@@ -71,21 +163,24 @@ function campaigntool_form($form, &$form_state) {
     '#title' => 'Type of Action?',
     '#required' => TRUE,
     '#options' => $options,
-  ); 
+    '#default_value' => isset($actions[0]) ? $actions[0] : NULL,
+  );
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => 'Title',
+    '#default_value' => isset($result) ? CRM_Utils_Array::value('title', $result['values'][$actions[1]]) : NULL,
     '#required' => TRUE, 
   ); 
   $form['summary'] = array(
     '#type' => 'textfield',
     '#title' => 'Summary',
+    '#default_value' => isset($summary) ? $summary : NULL,
     '#required' => TRUE, 
   );
   $form['start_date'] = array(
     '#type' => 'date_popup',
     '#title' => 'Event Start Date',
-    '#default_value' => date('Y-m-d'),
+    '#default_value' => isset($start_date) ? $start_date : date('Y-m-d'),
     '#date_format' => 'Y-m-d g:i a',
     '#date_label_position' => 'within',
     '#date_increment' => 15,
@@ -94,7 +189,7 @@ function campaigntool_form($form, &$form_state) {
   $form['end_date'] = array(
     '#type' => 'date_popup',
     '#title' => 'Event End Date',
-    '#default_value' => date('Y-m-d'),
+    '#default_value' => isset($end_date) ? $end_date : date('Y-m-d'),
     '#date_format' => 'Y-m-d g:i a',
     '#date_label_position' => 'within',
     '#date_increment' => 15,
@@ -110,6 +205,7 @@ function campaigntool_form($form, &$form_state) {
     '#type' => 'radios',
     '#title' => "Choose Location",
     '#options' => $locations,
+    '#default_value' => isset($loc_block_id) ? 2 : NULL,
     '#prefix' => '<div id="location-choice-wrapper">',
     '#suffix' => '</div>',
   );
@@ -117,6 +213,7 @@ function campaigntool_form($form, &$form_state) {
       '#type' => 'select',
       '#title' => "Use Location",
       '#options' => $locationEvents,
+      '#default_value' => isset($loc_block_id) ? $loc_block_id : 0,
       '#prefix' => '<div id="location-choose-wrapper">',
       '#suffix' => '</div>',
       '#ajax' => array(
@@ -127,48 +224,59 @@ function campaigntool_form($form, &$form_state) {
   $form['location_fieldset']["street_address"] = array(
       '#type' => 'textfield',
       '#title' => "Street Address",
+      '#default_value' => isset($street_address) ? $street_address : NULL,
     );
   $form['location_fieldset']["add1_address"] = array(
       '#type' => 'textfield',
       '#title' => "Addt'l Address 1",
+      '#default_value' => isset($add1_address) ? $add1_address : NULL,
     );
   $form['location_fieldset']["add2_address"] = array(
       '#type' => 'textfield',
       '#title' => "Addt'l Address 2",
+      '#default_value' => isset($add2_address) ? $add2_address : NULL,
     );
   $form['location_fieldset']["city"] = array(
       '#type' => 'textfield',
       '#title' => "City",
+      '#default_value' => isset($city) ? $city : NULL,
     );
   $form['location_fieldset']["zip"] = array(
       '#type' => 'textfield',
       '#title' => "ZipCode",
+      '#default_value' => isset($zip) ? $zip : NULL,
     );
   $form['location_fieldset']["suffix"] = array(
       '#type' => 'textfield',
       '#title' => "Suffix",
+      '#default_value' => isset($suffix) ? $suffix : NULL,
     );
   $form['location_fieldset']["country"] = array(
       '#type' => 'select',
       '#title' => "City",
       '#options' => $country,
+      '#default_value' => isset($country_val) ? $country_val : 1228,
     );
   $form['location_fieldset']["state"] = array(
       '#type' => 'select',
       '#title' => "State/Province",
       '#options' => $stateProvince,
+      '#default_value' => isset($state) ? $state : 1001,
     );
   $form['location_fieldset']["email"] = array(
       '#type' => 'textfield',
       '#title' => "Email",
+      '#default_value' => isset($email) ? $email : NULL,
     );
   $form['location_fieldset']["phone"] = array(
       '#type' => 'textfield',
       '#title' => "Phone",
+      '#default_value' => isset($phone) ? $phone : NULL,
     );
   $form['description'] = array(
     '#type' => 'textarea',
     '#title' => 'Description',
+    '#default_value' => isset($description) ? strip_tags($description) : NULL,
     '#required' => TRUE, 
   );
   $form['link'] = array(
@@ -179,14 +287,32 @@ function campaigntool_form($form, &$form_state) {
   $form['location_fieldset']['address_hidden'] = array(
     '#type' => 'hidden',
     '#title' => 'Address Hidden',
+    '#default_value' => isset($address_hidden) ? $address_hidden : NULL,
   );
   $form['location_fieldset']['email_hidden'] = array(
     '#type' => 'hidden',
     '#title' => 'Email Hidden',
+    '#default_value' => isset($email_hidden) ? $email_hidden : NULL,
   );
   $form['location_fieldset']['phone_hidden'] = array(
     '#type' => 'hidden',
     '#title' => 'Phone Hidden',
+    '#default_value' => isset($phone_hidden) ? $phone_hidden : NULL,
+  );
+  $form['location_fieldset']['profile_hidden'] = array(
+    '#type' => 'hidden',
+    '#title' => 'Profile Hidden',
+    '#default_value' => isset($profile) ? $profile : NULL,
+  );
+  $form['location_fieldset']['petition_hidden'] = array(
+    '#type' => 'hidden',
+    '#title' => 'Petition Hidden',
+    '#default_value' => isset($petition) ? $petition : NULL,
+  );
+  $form['location_fieldset']['event_hidden'] = array(
+    '#type' => 'hidden',
+    '#title' => 'Event Hidden',
+    '#default_value' => isset($event) ? $event : NULL,
   );
 
   $form['submit_button'] = array(
@@ -237,7 +363,7 @@ function campaigntool_form_submit($form, &$form_state) {
     3 => $form_state['values']['description'], //Description
     4 => $form_state['values']['link'], //More Link Name
   );
-  $gid = 14;
+  $gid = 13;
   $profile = CRM_Core_BAO_UFGroup::copy($gid);
   $profile->title = $fieldArray[1];
   $profile->save();
@@ -262,6 +388,7 @@ AND field_type = 'Formatting'";
 
     case 'event':
       $params = array(
+        'id' => CRM_Utils_Array::value('event_hidden', $form_state['values']),
         'title' => $fieldArray[1],
         'summary' => $fieldArray[2],
         'description' => $fieldArray[3],
@@ -343,6 +470,7 @@ AND field_type = 'Formatting'";
       break;
     case 'petition':
       $params = array(
+        'id' => isset($form_state['values']['petition_hidden']) ? $form_state['values']['petition_hidden'] : NULL,
         'version' => 3,
         'title' => $fieldArray[1],
         'activity_type_id' => '32',
