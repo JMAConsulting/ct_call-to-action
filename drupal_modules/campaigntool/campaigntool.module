@@ -363,7 +363,7 @@ function campaigntool_form_submit($form, &$form_state) {
     3 => $form_state['values']['description'], //Description
     4 => $form_state['values']['link'], //More Link Name
   );
-  $gid = 13;
+  $gid = 14;
   $profile = CRM_Core_BAO_UFGroup::copy($gid);
   $profile->title = $fieldArray[1];
   $profile->save();
