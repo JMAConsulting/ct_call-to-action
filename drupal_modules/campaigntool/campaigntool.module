@@ -59,6 +59,7 @@ function campaigntool_cta_delete($action) {
 
 function campaigntool_form($form, &$form_state, $id = NULL) {
   civicrm_initialize();
+  $form['#attached']['js'][] = drupal_get_path('module', 'campaigntool') . '/campaigntool.js';
   // handling an update
   if ($id) {
     $actions = explode('-', $id);
@@ -169,7 +170,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     '#type' => 'textfield',
     '#title' => 'Title',
     '#default_value' => isset($result) ? CRM_Utils_Array::value('title', $result['values'][$actions[1]]) : NULL,
-    '#required' => TRUE, 
+    '#required' => TRUE,
   ); 
   $form['summary'] = array(
     '#type' => 'textfield',
@@ -320,8 +321,6 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
-  
-  drupal_add_js(drupal_get_path('module', 'campaigntool') .'/campaigntool.js');
   return $form;
 }
 
@@ -517,6 +516,33 @@ function campaigntool_civicrm_postprocess($formName, &$form) {
 function campaigntool_node_view($node) {
 }
 
+function campaigntool_civicrm_buildForm($formName, &$form) { 
+  
+  if ($formName == "CRM_Profile_Form_Edit" || 
+    $formName == "CRM_Event_Form_Registration_Register"|| 
+    $formName == "CRM_Campaign_Form_Petition_Signature") {
+    CRM_Core_Region::instance('page-body')->add(array(
+        'template' => 'CRM/Extra/ModifyTpl.tpl',
+      ));
+     
+    switch ($formName) {
+      case "CRM_Profile_Form_Edit":
+        $afterDivname = '#crm-profile-block';
+        $eachDivName = '#crm-profile-block';
+        break;
+      case "CRM_Event_Form_Registration_Register":
+        $afterDivname = '#billing-payment-block';
+        $eachDivName = '.crm-profile';
+        break;
+      case "CRM_Campaign_Form_Petition_Signature":
+        $afterDivname = '.crm-petition-activity-profile';
+        $eachDivName = '.crm-petition-contact-profile';
+        break;
+    }
+    $form->assign('afterdiv', $afterDivname);
+    $form->assign('eachdiv', $eachDivName);
+  } 
+}
 
 function campaigntool_init() {
   civicrm_initialize();
