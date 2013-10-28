@@ -10,13 +10,6 @@ function campaigntool_menu() {
     'page arguments' => array('campaigntool_form', 1), 
     'access callback' => TRUE
   );
-  $items['call-to-action-entry/%'] = array(
-    'title' => 'Enter an Action', 
-    'description' => 'Use this form to enter in various calls to action (Events, Petitions or Subscriptions)',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('campaigntool_form', 1), 
-    'access callback' => TRUE
-  );
   $items['call-to-action-delete/%'] = array(
     'page callback' => 'campaigntool_cta_delete',
     'page arguments' => array(1), 
@@ -70,6 +63,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
           'version' => 3,
         );
         $result = civicrm_api('event', 'get', $params);
+        $title = $result['values'][$actions[1]]['title'];
         $event = CRM_Utils_Array::value('id', $result);
         $summary =  CRM_Utils_Array::value('summary', $result['values'][$actions[1]]);
         $description = CRM_Utils_Array::value('description', $result['values'][$actions[1]]);
@@ -129,6 +123,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
           'version' => 3,
         );
         $result = civicrm_api('survey', 'get', $params);
+        $title = $result['values'][$actions[1]]['title'];
         $summary = NULL;
         $description = CRM_Utils_Array::value('instructions', $result['values'][$actions[1]]);
         $petition = $actions[1];
@@ -140,8 +135,15 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
           'version' => 3,
         );
         $result = civicrm_api('uf_group', 'get', $params);
-        $actions[0] = 'petition';
-        $profile = $actions[1];
+        $ufFields = CRM_Core_BAO_UFGroup::getFields($result['id']);
+        foreach($ufFields as $key => $value) {
+          if (stristr($key, 'formatting_')) {
+            $fields[] = $ufFields[$key]['help_pre'];
+          }
+        }
+        list($title, $summary, $description, $link) = array_values($fields);
+        $actions[0] = 'subscription';
+        $profileId = $actions[1];
         break;
     }
   }
@@ -169,7 +171,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => 'Title',
-    '#default_value' => isset($result) ? CRM_Utils_Array::value('title', $result['values'][$actions[1]]) : NULL,
+    '#default_value' => isset($title) ? $title : NULL,
     '#required' => TRUE,
   ); 
   $form['summary'] = array(
@@ -283,7 +285,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   $form['link'] = array(
     '#type' => 'textfield',
     '#title' => 'More Link text',
-    '#default_value' => ' >> Learn More and Share',
+    '#default_value' => isset($link) ? $link : ' >> Learn More and Share',
     '#required' => TRUE,
   ); 
   $form['location_fieldset']['address_hidden'] = array(
@@ -304,7 +306,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   $form['location_fieldset']['profile_hidden'] = array(
     '#type' => 'hidden',
     '#title' => 'Profile Hidden',
-    '#default_value' => isset($profile) ? $profile : NULL,
+    '#default_value' => isset($profileId) ? $profileId : NULL,
   );
   $form['location_fieldset']['petition_hidden'] = array(
     '#type' => 'hidden',
@@ -356,6 +358,7 @@ function address_fill_callback($form, &$form_state) {
 function campaigntool_form_submit($form, &$form_state) {
 
   civicrm_initialize();
+  $new = FALSE;
   $params['type'] = $form_state['values']['action_type'];
   $fieldArray = array(
     1 => $form_state['values']['title'], //Title
@@ -363,17 +366,44 @@ function campaigntool_form_submit($form, &$form_state) {
     3 => $form_state['values']['description'], //Description
     4 => $form_state['values']['link'], //More Link Name
   );
-  $gid = 14;
-  $profile = CRM_Core_BAO_UFGroup::copy($gid);
-  $profile->title = $fieldArray[1];
-  $profile->save();
   $ufjoinId = $ufjointable = NULL;
-  $query = "DELETE FROM civicrm_uf_join
+  if (!(CRM_Utils_Array::value('profile_hidden', $form_state['values']) || 
+      CRM_Utils_Array::value('petition_hidden', $form_state['values']) ||
+      CRM_Utils_Array::value('event_hidden', $form_state['values']))
+  ) {
+    $gid = 14;
+    $new = TRUE;
+    $profile = CRM_Core_BAO_UFGroup::copy($gid);
+    $profile->title = $fieldArray[1];
+    $profile->save();
+    $query = "DELETE FROM civicrm_uf_join
 WHERE uf_group_id = {$profile->id} AND module != 'Profile'";
-  CRM_Core_DAO::executeQuery($query);
+    CRM_Core_DAO::executeQuery($query);
+  }
   $save = new CRM_Core_DAO_UFField();
-  
-  $query = "SELECT id, weight FROM civicrm_uf_field WHERE uf_group_id = $profile->id
+  if (isset($profile)) {
+    $id = $profile->id;
+  }
+  elseif (CRM_Utils_Array::value('profile_hidden', $form_state['values']))  {
+    $id = CRM_Utils_Array::value('profile_hidden', $form_state['values']);
+  }
+  elseif (CRM_Utils_Array::value('petition_hidden', $form_state['values'])) {
+    $joinParams = array(
+      'entity_table' => 'civicrm_survey',
+      'entity_id' => CRM_Utils_Array::value('petition_hidden', $form_state['values']),
+      'module' => 'CiviCampaign',
+    );
+    $id = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
+  }
+  elseif (CRM_Utils_Array::value('event_hidden', $form_state['values'])) {
+    $joinParams = array(
+      'entity_table' => 'civicrm_event',
+      'entity_id' => CRM_Utils_Array::value('event_hidden', $form_state['values']),
+      'module' => 'CiviEvent',
+    );
+    $id = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
+  }
+  $query = "SELECT id, weight FROM civicrm_uf_field WHERE uf_group_id = {$id}
 AND field_type = 'Formatting'";
   $ufField = CRM_Core_DAO::executeQuery($query);
   while ($ufField->fetch()) {
@@ -484,7 +514,7 @@ AND field_type = 'Formatting'";
       $ufjoinmodule = 'CiviCampaign';
       break;
   }
-  if ($ufjoinId && $ufjointable && $ufjoinmodule) {
+  if ($ufjoinId && $ufjointable && $ufjoinmodule && $new) {
     $params = array(
       'module' => $ufjoinmodule,
       'entity_table' => $ufjointable,
