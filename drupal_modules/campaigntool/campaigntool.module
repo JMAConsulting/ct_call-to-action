@@ -115,6 +115,20 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
             $email = CRM_Utils_Array::value('email', $email['values'][$email['id']]);
           }
         }
+        // get more link
+        $joinParams = array(
+          'entity_id' => $actions[1],
+          'entity_table' => 'civicrm_event',
+          'module' => 'CiviEvent',
+        );
+        $ufGroupId = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
+        $ufFields = CRM_Core_BAO_UFGroup::getFields($ufGroupId);
+        foreach($ufFields as $key => $value) {
+          if (stristr($key, 'formatting_')) {
+            $fields[] = $ufFields[$key]['help_pre'];
+          }
+        }
+        $link = $fields[3];
         break;
 
       case 'petition': 
@@ -127,6 +141,20 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
         $summary = NULL;
         $description = CRM_Utils_Array::value('instructions', $result['values'][$actions[1]]);
         $petition = $actions[1];
+        // get more link
+        $joinParams = array(
+          'entity_id' => $actions[1],
+          'entity_table' => 'civicrm_survey',
+          'module' => 'CiviCampaign',
+        );
+        $ufGroupId = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
+        $ufFields = CRM_Core_BAO_UFGroup::getFields($ufGroupId);
+        foreach($ufFields as $key => $value) {
+          if (stristr($key, 'formatting_')) {
+            $fields[] = $ufFields[$key]['help_pre'];
+          }
+        }
+        $link = $fields[3];
         break;
 
       case 'profile':
