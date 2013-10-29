@@ -615,3 +615,23 @@ function campaigntool_init() {
     drupal_set_message( t('Thank you for subscribing to '. $title) );
   }
 }
+/**
+ * Implements hook_webform_submission_presave().
+ * Initial submission processing - saves contacts.
+ */
+function campaigntool_webform_submission_presave(&$node, &$submission) {
+  if (!empty($submission->file_usage['added_fids'][0]) && !empty($node->webform_civicrm['data']['activity'])) {
+    $file = file_load($submission->file_usage['added_fids'][0]);
+    $filepath = drupal_realpath($file->uri);
+    $config = CRM_Core_Config::singleton();
+    $newFileName = $config->uploadDir . 'Proof of Date of Birth_' . md5(date('YmdHis')) . '.' . pathinfo($filepath, PATHINFO_EXTENSION);;
+    copy($filepath, $newFileName);
+    $node->webform_civicrm['data']['activity'][1]['activity'][1]['attachFile_1'] = array(
+      'uri' => $newFileName,
+      'type' => $file->filemime,
+      'location' => $newFileName,
+      'upload_date' => date('YmdHis'),
+    );
+    file_delete($file);
+  }
+}
