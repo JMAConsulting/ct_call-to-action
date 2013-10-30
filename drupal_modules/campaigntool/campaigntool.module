@@ -138,7 +138,6 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
         );
         $result = civicrm_api('survey', 'get', $params);
         $title = $result['values'][$actions[1]]['title'];
-        $summary = NULL;
         $description = CRM_Utils_Array::value('instructions', $result['values'][$actions[1]]);
         $petition = $actions[1];
         // get more link
@@ -155,6 +154,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
           }
         }
         $link = $fields[3];
+        $summary = $fields[1];
         break;
 
       case 'profile':
@@ -351,7 +351,18 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
+  $form['actions']['cancel'] = array(
+    '#type'   => 'submit',
+    '#value'  => t('Cancel'),
+    '#submit' => array('campaigntool_cancel_button'),
+    '#limit_validation_errors' => array(),
+  );
   return $form;
+}
+
+function campaigntool_cancel_button($form, &$form_state) {
+  $url = 'call-to-action-selection';
+  drupal_goto($url);
 }
 
 function address_fill_callback($form, &$form_state) {
@@ -556,6 +567,7 @@ AND field_type = 'Formatting'";
  
     civicrm_api('uf_join', 'create', $params);
   }
+  $form_state['redirect'] = 'call-to-action-selection';
 }
 
 
