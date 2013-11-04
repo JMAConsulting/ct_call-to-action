@@ -660,3 +660,80 @@ function campaigntool_webform_submission_presave(&$node, &$submission) {
     }
   }
 }
+
+function campaigntool_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == "webform_client_form_288") {
+    $form['#attached']['js'][] = drupal_get_path('module', 'campaigntool') . '/campaigntool_webform.js';
+    $form['#validate'][]='campaigntool_form_webform_validate';
+    return $form;
+  }
+}
+
+function campaigntool_form_webform_validate($form,&$form_state) {
+  $occasion = $form_state['values']['submitted']['civicrm_1_contact_1_fieldset_fieldset']['occasion'];
+  if ($occasion == 'birthday' 
+    && $form_state['values']['submitted']['greetings_requested_from']['queen_proof_required']['queen'] == 'queen' 
+    && $form_state['values']['submitted']['greetings_requested_from']['proof_of_date_of_birth'] == 0
+  ) {
+    form_set_error('proof_of_date_of_birth', t('Please submit your proof of date of birth'));
+  }
+
+  $years = $form_state['values']['submitted']['civicrm_1_contact_1_fieldset_fieldset']['number_of_years'];
+  switch ($occasion) {
+    case 'birthday':
+      if ($form_state['values']['submitted']['greetings_requested_from']['queen_proof_required']['queen'] === 'queen' && $years < 100) {
+        form_set_error('queen_proof_required', t('Number of years not enough to receive greetings from Queen!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['governor_general']['governor-general'] === 'governor-general' && $years < 90) {
+        form_set_error('governor-general', t('Number of years not enough to receive greetings from Governor General!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['prime_minister']['pm'] === 'pm'
+        && $form_state['values']['submitted']['greetings_requested_from']['pm_greetings_request_letter'] == 0
+        && $years < 75
+      ) {
+        form_set_error('prime_minister', t('Number of years not enough to receive greetings from Prime Minister!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['prime_minister']['pm'] === 'pm' 
+        && $form_state['values']['submitted']['greetings_requested_from']['pm_greetings_request_letter'] != 0
+        && $years < 65
+      ) {
+        form_set_error('prime_minister', t('Number of years not enough to receive greetings from Prime Minister!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['opposition_leader']['opposition'] === 'opposition' && $years < 75) {
+        form_set_error('opposition', t('Number of years not enough to receive greetings from Opposition Leader!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['bc_protocol']['bc'] === 'bc' && $years < 75) {
+        form_set_error('bc_protocol', t('Number of years not enough to receive greetings from BC Protocol!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['lieutenant_governor']['lieutenant'] === 'lieutenant' && $years < 90) {
+        form_set_error('lieutenant_governor', t('Number of years not enough to receive greetings from Lieutenant Governor!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['mla']['mla'] === 'mla' && $years < 75) {
+        form_set_error('mla', t('Number of years not enough to receive greetings from MLA!'));
+      }
+      break;
+    case 'anniversary':
+      if ($form_state['values']['submitted']['greetings_requested_from']['queen_proof_required']['queen'] === 'queen' && $years < 65) {
+        form_set_error('queen_proof_required', t('Number of years not enough to receive greetings from Queen!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['governor_general']['governor-general'] === 'governor-general' && $years < 50) {
+        form_set_error('governor_general', t('Number of years not enough to receive greetings from Governor General!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['prime_minister']['pm'] === 'pm' && $years < 25) {
+        form_set_error('prime_minister', t('Number of years not enough to receive greetings from Prime Miwnister!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['opposition_leader']['opposition'] === 'opposition' && $years < 25) {
+        form_set_error('opposition', t('Number of years not enough to receive greetings from Opposition Leader!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['bc_protocol']['bc'] === 'bc' && $years < 25) {
+        form_set_error('bc_protocol', t('Number of years not enough to receive greetings from BC Protocol!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['lieutenant_governor']['lieutenant'] === 'lieutenant' && $years < 50) {
+        form_set_error('lieutenant_governor', t('Number of years not enough to receive greetings from Lieutenant Governor!'));
+      }
+      if ($form_state['values']['submitted']['greetings_requested_from']['mla']['mla'] === 'mla' && $years < 25) {
+        form_set_error('mla', t('Number of years not enough to receive greetings from MLA!'));
+      }
+      break;
+  }
+}
