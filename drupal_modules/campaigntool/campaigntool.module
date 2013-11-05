@@ -397,7 +397,7 @@ function address_fill_callback($form, &$form_state) {
 function campaigntool_form_submit($form, &$form_state) {
 
   civicrm_initialize();
-  $new = FALSE;
+  $new = $http_value = FALSE;
   $params['type'] = $form_state['values']['action_type'];
   $fieldArray = array(
     1 => $form_state['values']['title'], //Title
@@ -425,8 +425,10 @@ WHERE uf_group_id = {$profile->id} AND module != 'Profile'";
   }
   elseif (CRM_Utils_Array::value('profile_hidden', $form_state['values']))  {
     $id = CRM_Utils_Array::value('profile_hidden', $form_state['values']);
+    $http_value = 'profile-'.CRM_Utils_Array::value('profile_hidden', $form_state['values']);
   }
   elseif (CRM_Utils_Array::value('petition_hidden', $form_state['values'])) {
+    $http_value = 'petition-'.CRM_Utils_Array::value('petition_hidden', $form_state['values']);
     $joinParams = array(
       'entity_table' => 'civicrm_survey',
       'entity_id' => CRM_Utils_Array::value('petition_hidden', $form_state['values']),
@@ -435,6 +437,7 @@ WHERE uf_group_id = {$profile->id} AND module != 'Profile'";
     $id = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
   }
   elseif (CRM_Utils_Array::value('event_hidden', $form_state['values'])) {
+    $http_value = 'event-'.CRM_Utils_Array::value('event_hidden', $form_state['values']);
     $joinParams = array(
       'entity_table' => 'civicrm_event',
       'entity_id' => CRM_Utils_Array::value('event_hidden', $form_state['values']),
@@ -567,6 +570,9 @@ AND field_type = 'Formatting'";
  
     civicrm_api('uf_join', 'create', $params);
   }
+  if ($http_value) {
+    CRM_Utils_System::getServerResponse('http://localhost/operation?value='.$http_value);
+  }
   $form_state['redirect'] = 'call-to-action-selection';
 }
 
@@ -603,11 +609,15 @@ function campaigntool_civicrm_buildForm($formName, &$form) {
       case "CRM_Event_Form_Registration_Register":
         $afterDivname = '#billing-payment-block';
         $eachDivName = '.crm-profile';
+        $buttonText = 'Register Now';
         break;
       case "CRM_Campaign_Form_Petition_Signature":
         $afterDivname = '.crm-petition-activity-profile';
         $eachDivName = '.crm-petition-contact-profile';
         break;
+    }
+    if ($buttonText) {
+    $form->assign('buttonText', $buttonText);
     }
     $form->assign('afterdiv', $afterDivname);
     $form->assign('eachdiv', $eachDivName);

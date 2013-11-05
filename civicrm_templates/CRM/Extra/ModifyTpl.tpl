@@ -26,6 +26,10 @@
 <script>
 {literal}
 cj(document).ready(function() {
+ {/literal}{if $buttonText}{literal}
+  var button = {/literal}'{$buttonText}'{literal};
+  cj('#_qf_Register_upload-bottom').attr('value', button);
+ {/literal}{/if}{literal}
 
   var after = '{/literal}{$afterdiv}{literal}';
   var eachdiv = ' {/literal}{$eachdiv}{literal}  .crm-section';
@@ -48,6 +52,7 @@ cj(document).ready(function() {
   cj('.crm-submit-buttons').remove();
   cj('.newDiv').append('<div class="crm-submit-buttons">' + htm + '</div>');
 });
+
 
 
 {/literal}
