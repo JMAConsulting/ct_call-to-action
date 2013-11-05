@@ -684,6 +684,16 @@ function campaigntool_form_alter(&$form, &$form_state, $form_id) {
 
 function campaigntool_form_webform_validate($form,&$form_state) {
   $occasion = $form_state['values']['submitted']['civicrm_1_contact_1_fieldset_fieldset']['occasion'];
+  $flag = FALSE;
+  foreach ($form_state['values']['submitted']['greetings_requested_from'] as $fieldset => $field) {
+    if ((is_array($field) && current($field) !== 0) || ($fieldset === 'mp' && $fieldset !== 0)) {
+      $flag = TRUE;
+      break;
+    }
+  }
+  if ($flag) {
+    form_set_error('greetings_requested_from', t('Please select atleast one person you wish to receive greetings from.'));
+  }
   if ($occasion === 'birthday' 
     && $form_state['values']['submitted']['greetings_requested_from']['queen_proof_required']['queen'] === 'queen' 
     && $form_state['values']['submitted']['greetings_requested_from']['proof_of_date_of_birth'] == 0
