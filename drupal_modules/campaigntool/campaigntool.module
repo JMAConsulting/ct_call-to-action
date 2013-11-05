@@ -571,7 +571,8 @@ AND field_type = 'Formatting'";
     civicrm_api('uf_join', 'create', $params);
   }
   if ($http_value) {
-    CRM_Utils_System::getServerResponse('http://localhost/operation?value='.$http_value);
+    global $base_url;
+    CRM_Utils_System::getServerResponse($base_url.'/operation?value='.$http_value);
   }
   $form_state['redirect'] = 'call-to-action-selection';
 }
