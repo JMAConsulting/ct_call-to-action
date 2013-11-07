@@ -598,6 +598,9 @@ function campaigntool_civicrm_buildForm($formName, &$form) {
   if ($formName == "CRM_Profile_Form_Edit" || 
     $formName == "CRM_Event_Form_Registration_Register"|| 
     $formName == "CRM_Campaign_Form_Petition_Signature") {
+
+    //NG. define $buttonText so that there is no php notice warning on this page http://pj.campaigntool.ca/civicrm/petition/sign?sid=4&reset=1
+    $buttonText = '';
     CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Extra/ModifyTpl.tpl',
       ));
