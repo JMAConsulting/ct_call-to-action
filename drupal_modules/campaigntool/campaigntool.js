@@ -14,9 +14,7 @@
 		$('#address-wrapper').show();
 		break;
 	    case 'petition':
-		$('.container-inline-date').hide();
-		$('#address-wrapper').hide();
-		break;
+	    case 'survey':
 	    case 'subscription':
 		$('.container-inline-date').hide();
 		$('#address-wrapper').hide();
