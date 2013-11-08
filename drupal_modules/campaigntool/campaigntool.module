@@ -1,4 +1,5 @@
 <?php
+define('ACTIVITY_TYPE_ID', 2);
 
 function campaigntool_menu() {
   $items = array();
@@ -188,6 +189,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     'event' => 'Event',
     'petition' => 'Petition',
     'subscription' => 'Subscription',
+    'survey' => 'Survey',
   );
   $form['action_type'] = array(
     '#type' => 'select',
@@ -555,6 +557,51 @@ AND field_type = 'Formatting'";
       $ufjointable = 'civicrm_survey';
       $ufjoinmodule = 'CiviCampaign';
       break;
+      
+    case 'survey':
+
+      $fieldValues = array('option_group_id' => ACTIVITY_TYPE_ID);
+      $activityTypeParams = array(
+        'label' => $fieldArray[1],
+        'weight' => CRM_Utils_Weight::getDefaultWeight('CRM_Core_DAO_OptionValue', $fieldValues),
+        'is_active' => 1,
+      );
+      
+      $typeResult = civicrm_api3('activity_type', 'create', $activityTypeParams);
+      $params = array(
+        'id' => isset($form_state['values']['survey_hidden']) ? $form_state['values']['survey_hidden'] : NULL,
+        'version' => 3,
+        'title' => $fieldArray[1],
+        'activity_type_id' => '32',
+        'instructions' => $fieldArray[3],
+      );
+ 
+      $result = civicrm_api('survey', 'create' ,$params);
+      $action = "Survey";
+      $ufjoinId = $result['id'];
+      $ufjointable = 'civicrm_survey';
+      $ufjoinmodule = 'CiviCampaign';
+      // Create the activity profile
+      $ufParams = array(
+        'group_type' => 'Activity',
+        'is_active' => 1,
+        'name' => $fieldArray[1],
+        'title' => $fieldArray[1],
+      );
+      
+      $result = civicrm_api3('uf_group', 'create', $ufParams);
+      $ufParams = array(
+        'module' => $ufjoinmodule,
+        'entity_table' => $ufjointable,
+        'entity_id' => $ufjoinId,
+        'weight' => 1,
+        'uf_group_id' => $result['id'],
+        'is_active' => 1,
+        'sequential' => 1,
+      );
+      
+      civicrm_api3('uf_join', 'create', $ufParams);
+      break;
   }
   if ($ufjoinId && $ufjointable && $ufjoinmodule && $new) {
     $params = array(
@@ -564,11 +611,9 @@ AND field_type = 'Formatting'";
       'weight' => 2,
       'uf_group_id' => $profile->id,
       'is_active' => 1,
-      'version' => 3,
       'sequential' => 1,
     );
- 
-    civicrm_api('uf_join', 'create', $params);
+    civicrm_api3('uf_join', 'create', $params);
   }
   if ($http_value) {
     global $base_url;
