@@ -145,6 +145,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
         $joinParams = array(
           'entity_id' => $actions[1],
           'entity_table' => 'civicrm_survey',
+          'weight' => 2,
           'module' => 'CiviCampaign',
         );
         $ufGroupId = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
@@ -435,6 +436,7 @@ WHERE uf_group_id = {$profile->id} AND module != 'Profile'";
       'entity_table' => 'civicrm_survey',
       'entity_id' => CRM_Utils_Array::value('petition_hidden', $form_state['values']),
       'module' => 'CiviCampaign',
+      'weight' => 2,
     );
     $id = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
   }
@@ -569,7 +571,7 @@ AND field_type = 'Formatting'";
       
       $typeResult = civicrm_api3('activity_type', 'create', $activityTypeParams);
       $params = array(
-        'id' => isset($form_state['values']['survey_hidden']) ? $form_state['values']['survey_hidden'] : NULL,
+        'id' => isset($form_state['values']['petition_hidden']) ? $form_state['values']['petition_hidden'] : NULL,
         'version' => 3,
         'title' => $fieldArray[1],
         'activity_type_id' => '32',
