@@ -523,12 +523,14 @@ AND field_type = 'Formatting'";
       $email = CRM_Core_BAO_Email::add($emailParams);
       // create or update loc block
       $locBlockParams = array(
-        'id' => ($form_state['values']['location'] != 0) ? $form_state['values']['location'] : NULL,
         'address_id' => isset($address->id) ? $address->id : NULL,
         'phone_id' => isset($phone->id) ? $phone->id : NULL,
         'email_id' => isset($email->id) ? $email->id : NULL,
         'version' => 3,
       );
+      if ($form_state['values']['location'] != 0) {
+        $locBlockParams['id'] = $form_state['values']['location'];
+      }
       $locBlock = civicrm_api('loc_block', 'create', $locBlockParams);
       // Update the event with the loc block if new address
       if ($form_state['values']['location'] == 0) {
@@ -546,12 +548,14 @@ AND field_type = 'Formatting'";
       break;
     case 'petition':
       $params = array(
-        'id' => CRM_Utils_Array::value('petition_hidden', $form_state['values']),
         'version' => 3,
         'title' => $fieldArray[1],
         'activity_type_id' => '32',
         'instructions' => $fieldArray[3],
       );
+      if (CRM_Utils_Array::value('petition_hidden', $form_state['values'])) {
+        $params['id'] = CRM_Utils_Array::value('petition_hidden', $form_state['values']);
+      }
  
       $result = civicrm_api('survey', 'create' ,$params);
       $action = "Petition";
@@ -571,12 +575,14 @@ AND field_type = 'Formatting'";
       
       $typeResult = civicrm_api3('activity_type', 'create', $activityTypeParams);
       $params = array(
-        'id' => CRM_Utils_Array::value('petition_hidden', $form_state['values']),
         'version' => 3,
         'title' => $fieldArray[1],
         'activity_type_id' => '32',
         'instructions' => $fieldArray[3],
       );
+      if (CRM_Utils_Array::value('petition_hidden', $form_state['values'])) {
+        $params['id'] = CRM_Utils_Array::value('petition_hidden', $form_state['values']);
+      }
  
       $result = civicrm_api('survey', 'create' ,$params);
       $action = "Survey";
