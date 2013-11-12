@@ -646,8 +646,16 @@ function campaigntool_civicrm_postprocess($formName, &$form) {
 function campaigntool_node_view($node) {
 }
 
+function campaigntool_civicrm_pageRun( &$page ) {
+  if ($page->getVar('_name') == 'CRM_Event_Page_EventInfo') {
+    CRM_Core_Region::instance('page-body')->add(array(
+        'markup' => '<p class="ical-description">Download the iCal entry or iCal feed for this event.</p>',
+      ));
+  }
+}
+
 function campaigntool_civicrm_buildForm($formName, &$form) { 
-  
+
   if ($formName == "CRM_Profile_Form_Edit" || 
     $formName == "CRM_Event_Form_Registration_Register"|| 
     $formName == "CRM_Campaign_Form_Petition_Signature") {
