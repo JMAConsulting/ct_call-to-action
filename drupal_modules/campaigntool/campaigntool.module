@@ -749,7 +749,7 @@ function campaigntool_form_alter(&$form, &$form_state, $form_id) {
 
 function campaigntool_form_webform_flag_validate($form,&$form_state) {
   if ($form_state['values']['submitted']['civicrm_1_activity_1_cg13_custom_52'] == 0 && $form_state['values']['submitted']['civicrm_1_activity_1_cg13_custom_50'] == 0) {
-    form_set_error('', t('Please select number of pins and/or number of flags'));
+    form_set_error('', t('Please enter a number for the pins and/or flag you would like.'));
   }
   if ($form_state['values']['submitted']['civicrm_1_activity_1_cg13_custom_50'] > 0 && $form_state['values']['submitted']['civicrm_1_activity_1_cg13_custom_51'] == '') {
     form_set_error('civicrm_1_activity_1_cg13_custom_51', t('Please enter the intended use of the flag'));
