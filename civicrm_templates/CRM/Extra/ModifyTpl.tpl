@@ -31,6 +31,11 @@ cj(document).ready(function() {
   cj('#_qf_Register_upload-bottom').attr('value', button);
  {/literal}{/if}{literal}
 
+ {/literal}{if $surveyText}{literal}
+  var buttonText = {/literal}'{$surveyText}'{literal};
+  cj('#_qf_Signature_next-bottom').attr('value', buttonText);
+ {/literal}{/if}{literal}
+
   var after = '{/literal}{$afterdiv}{literal}';
   var eachdiv = ' {/literal}{$eachdiv}{literal}  .crm-section';
   cj("<div class='newDiv'></div>").insertAfter(after);

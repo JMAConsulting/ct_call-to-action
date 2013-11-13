@@ -199,6 +199,9 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     '#options' => $options,
     '#default_value' => isset($actions[0]) ? $actions[0] : NULL,
   );
+  if (isset($actions[0])) {
+    $form['action_type']['#attributes'] = array('disabled' => TRUE); 
+  }
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => 'Title',
@@ -311,7 +314,6 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     '#type' => 'textarea',
     '#title' => 'Description',
     '#default_value' => isset($description) ? strip_tags($description) : NULL,
-    '#required' => TRUE, 
   );
   $form['link'] = array(
     '#type' => 'textfield',
@@ -659,9 +661,6 @@ function campaigntool_civicrm_buildForm($formName, &$form) {
   if ($formName == "CRM_Profile_Form_Edit" || 
     $formName == "CRM_Event_Form_Registration_Register"|| 
     $formName == "CRM_Campaign_Form_Petition_Signature") {
-
-    //NG. define $buttonText so that there is no php notice warning on this page http://pj.campaigntool.ca/civicrm/petition/sign?sid=4&reset=1
-    $buttonText = '';
     CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Extra/ModifyTpl.tpl',
       ));
@@ -674,15 +673,15 @@ function campaigntool_civicrm_buildForm($formName, &$form) {
       case "CRM_Event_Form_Registration_Register":
         $afterDivname = '#billing-payment-block';
         $eachDivName = '.crm-profile';
-        $buttonText = 'Register Now';
+        $form->assign('buttonText', 'Register Now');
         break;
       case "CRM_Campaign_Form_Petition_Signature":
         $afterDivname = '.crm-petition-activity-profile';
         $eachDivName = '.crm-petition-contact-profile';
+        if ($form->getVar('_activityProfileId')) {
+          $form->assign('surveyText', 'Send your Survey');
+        }
         break;
-    }
-    if ($buttonText) {
-    $form->assign('buttonText', $buttonText);
     }
     $form->assign('afterdiv', $afterDivname);
     $form->assign('eachdiv', $eachDivName);
