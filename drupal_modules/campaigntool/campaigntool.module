@@ -194,7 +194,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   );
   $form['action_type'] = array(
     '#type' => 'select',
-    '#title' => 'Type of Action?',
+    '#title' => t('Type of Action?'),
     '#required' => TRUE,
     '#options' => $options,
     '#default_value' => isset($actions[0]) ? $actions[0] : NULL,
@@ -204,19 +204,19 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   }
   $form['title'] = array(
     '#type' => 'textfield',
-    '#title' => 'Title',
+    '#title' => t('Title'),
     '#default_value' => isset($title) ? $title : NULL,
     '#required' => TRUE,
   ); 
   $form['summary'] = array(
     '#type' => 'textfield',
-    '#title' => 'Summary',
+    '#title' => t('Summary'),
     '#default_value' => isset($summary) ? $summary : NULL,
     '#required' => TRUE, 
   );
   $form['start_date'] = array(
     '#type' => 'date_popup',
-    '#title' => 'Event Start Date',
+    '#title' => t('Event Start Date'),
     '#default_value' => isset($start_date) ? $start_date : date('Y-m-d'),
     '#date_format' => 'Y-m-d g:i a',
     '#date_label_position' => 'within',
@@ -225,7 +225,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   );
   $form['end_date'] = array(
     '#type' => 'date_popup',
-    '#title' => 'Event End Date',
+    '#title' => t('Event End Date'),
     '#default_value' => isset($end_date) ? $end_date : date('Y-m-d'),
     '#date_format' => 'Y-m-d g:i a',
     '#date_label_position' => 'within',
@@ -233,14 +233,14 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     '#date_year_range' => '0:+2',
   );
   $form['location_fieldset'] = array(
-    '#title' => t("Event Location"),
+    '#title' => t('Event Location'),
     '#prefix' => '<div id="address-wrapper">',
     '#suffix' => '</div>',
     '#type' => 'fieldset',
   );
   $form['location_fieldset']["location_type"] = array(
     '#type' => 'radios',
-    '#title' => "Choose Location",
+    '#title' => t('Choose Location'),
     '#options' => $locations,
     '#default_value' => isset($loc_block_id) ? 2 : NULL,
     '#prefix' => '<div id="location-choice-wrapper">',
@@ -248,7 +248,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   );
   $form['location_fieldset']["location"] = array(
       '#type' => 'select',
-      '#title' => "Use Location",
+      '#title' => t('Use Location'),
       '#options' => $locationEvents,
       '#default_value' => isset($loc_block_id) ? $loc_block_id : 0,
       '#prefix' => '<div id="location-choose-wrapper">',
@@ -260,95 +260,95 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     );
   $form['location_fieldset']["street_address"] = array(
       '#type' => 'textfield',
-      '#title' => "Street Address",
+      '#title' => t('Street Address'),
       '#default_value' => isset($street_address) ? $street_address : NULL,
     );
   $form['location_fieldset']["add1_address"] = array(
       '#type' => 'textfield',
-      '#title' => "Addt'l Address 1",
+      '#title' => t("Addt'l Address 1"),
       '#default_value' => isset($add1_address) ? $add1_address : NULL,
     );
   $form['location_fieldset']["add2_address"] = array(
       '#type' => 'textfield',
-      '#title' => "Addt'l Address 2",
+      '#title' => t("Addt'l Address 2"),
       '#default_value' => isset($add2_address) ? $add2_address : NULL,
     );
   $form['location_fieldset']["city"] = array(
       '#type' => 'textfield',
-      '#title' => "City",
+      '#title' => t('City'),
       '#default_value' => isset($city) ? $city : NULL,
     );
   $form['location_fieldset']["zip"] = array(
       '#type' => 'textfield',
-      '#title' => "ZipCode",
+      '#title' => t('ZipCode'),
       '#default_value' => isset($zip) ? $zip : NULL,
     );
   $form['location_fieldset']["suffix"] = array(
       '#type' => 'textfield',
-      '#title' => "Suffix",
+      '#title' => t('Suffix'),
       '#default_value' => isset($suffix) ? $suffix : NULL,
     );
   $form['location_fieldset']["country"] = array(
       '#type' => 'select',
-      '#title' => "City",
+      '#title' => t('Country'),
       '#options' => $country,
       '#default_value' => isset($country_val) ? $country_val : 1228,
     );
   $form['location_fieldset']["state"] = array(
       '#type' => 'select',
-      '#title' => "State/Province",
+      '#title' => t('State/Province'),
       '#options' => $stateProvince,
       '#default_value' => isset($state) ? $state : 1001,
     );
   $form['location_fieldset']["email"] = array(
       '#type' => 'textfield',
-      '#title' => "Email",
+      '#title' => t('Email'),
       '#default_value' => isset($email) ? $email : NULL,
     );
   $form['location_fieldset']["phone"] = array(
       '#type' => 'textfield',
-      '#title' => "Phone",
+      '#title' => t('Phone'),
       '#default_value' => isset($phone) ? $phone : NULL,
     );
   $form['description'] = array(
     '#type' => 'textarea',
-    '#title' => 'Description',
+    '#title' => t('Description'),
     '#default_value' => isset($description) ? strip_tags($description) : NULL,
   );
   $form['link'] = array(
     '#type' => 'textfield',
-    '#title' => 'More Link text',
+    '#title' => t('More Link text'),
     '#default_value' => isset($link) ? $link : ' >> Learn More and Share',
     '#required' => TRUE,
   ); 
   $form['location_fieldset']['address_hidden'] = array(
     '#type' => 'hidden',
-    '#title' => 'Address Hidden',
+    '#title' => t('Address Hidden'),
     '#default_value' => isset($address_hidden) ? $address_hidden : NULL,
   );
   $form['location_fieldset']['email_hidden'] = array(
     '#type' => 'hidden',
-    '#title' => 'Email Hidden',
+    '#title' => t('Email Hidden'),
     '#default_value' => isset($email_hidden) ? $email_hidden : NULL,
   );
   $form['location_fieldset']['phone_hidden'] = array(
     '#type' => 'hidden',
-    '#title' => 'Phone Hidden',
+    '#title' => t('Phone Hidden'),
     '#default_value' => isset($phone_hidden) ? $phone_hidden : NULL,
   );
   $form['location_fieldset']['profile_hidden'] = array(
     '#type' => 'hidden',
-    '#title' => 'Profile Hidden',
+    '#title' => t('Profile Hidden'),
     '#default_value' => isset($profileId) ? $profileId : NULL,
   );
   $form['location_fieldset']['petition_hidden'] = array(
     '#type' => 'hidden',
-    '#title' => 'Petition Hidden',
+    '#title' => t('Petition Hidden'),
     '#default_value' => isset($petition) ? $petition : NULL,
   );
   $form['location_fieldset']['event_hidden'] = array(
     '#type' => 'hidden',
-    '#title' => 'Event Hidden',
+    '#title' => t('Event Hidden'),
     '#default_value' => isset($event) ? $event : NULL,
   );
 
