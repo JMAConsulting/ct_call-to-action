@@ -38,6 +38,10 @@ cj(document).ready(function() {
 
   var after = '{/literal}{$afterdiv}{literal}';
   var eachdiv = ' {/literal}{$eachdiv}{literal}  .crm-section';
+  if (after == '.crm-petition-activity-profile') {
+    cj("<div class='profileDiv'></div>").insertAfter(after);
+    after = '.profileDiv';
+  }
   cj("<div class='newDiv'></div>").insertAfter(after);
   var formattings = new Array("", "title", "summaryp", "descriptionp", "morelink");
   var count = 1; 
@@ -55,6 +59,15 @@ cj(document).ready(function() {
   });
   htm = cj('.crm-submit-buttons').html();
   cj('.crm-submit-buttons').remove();
+  if (after == '.profileDiv') {
+    var cProfile = cj('.crm-petition-contact-profile').html();
+    var aProfile = cj('.crm-petition-activity-profile').html();
+    cj('.crm-petition-activity-profile').remove();
+    cj('.crm-petition-contact-profile').remove();
+
+    cj('.profileDiv').append('<div class="crm-section crm-petition-contact-profile">' + cProfile + '</div>');
+    cj('.profileDiv').append('<div class="crm-section crm-petition-activity-profile">' + aProfile + '</div>');
+  }
   cj('.newDiv').append('<div class="crm-submit-buttons">' + htm + '</div>');
 });
 
