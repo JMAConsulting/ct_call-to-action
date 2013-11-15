@@ -165,8 +165,6 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
           'module' => 'CiviCampaign',
         );
         $ufGroupId = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
-        CRM_Core_Error::debug( '$ufGroupId', $ufGroupId );
-        exit;
         if ($ufGroupId) {
           $actions[0] = 'survey'; 
         }
