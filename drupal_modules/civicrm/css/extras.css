@@ -13,10 +13,10 @@
 body.page-civicrm-profile-create.rightColumn #content, body.page-civicrm-petition-sign #content, body.page-civicrm-event-register #content {
     width: 990px !important;
 }
-.page-civicrm-profile-create #crm-profile-block, .page-civicrm-petition-sign .crm-petition-contact-profile, .page-civicrm-event-register .crm-profile {
+.page-civicrm-profile-create #crm-profile-block, .page-civicrm-petition-sign .profileDiv, .page-civicrm-event-register .crm-profile{
     border: 0 none !important;
     float: left;
-    width: 656px;
+    width: 656px !important;
 }
 .page-civicrm-profile-create #crm-profile-block .title span, .page-civicrm-petition-sign .crm-petition-contact-profile .title span, .page-civicrm-event-register .crm-profile .title span {
 	font-family: Arial, Helvetica, sans-serif;
@@ -53,7 +53,7 @@ body.page-civicrm-profile-create.rightColumn #content, body.page-civicrm-petitio
 }
 .newDiv .crm-section {
 	margin-bottom: 24px !important;
-	padding:0px;
+	padding:0px !important;
 }
 .newDiv .crm-submit-buttons .form-submit {
 	width: 260px !important;
@@ -83,10 +83,40 @@ body.page-civicrm-profile-create.rightColumn #content, body.page-civicrm-petitio
     background-color: transparent !important;
     background-image: none !important;
     border: 0 none !important;
-    margin-left: 59px !important;
+    margin-left: 43px !important;
 }
-.page-civicrm-petition-sign .crm-petition-contact-profile .label, .page-civicrm-petition-sign .crm-petition-contact-profile .content,  .page-civicrm-event-register .crm-profile legend {
+.page-civicrm-petition-sign .crm-petition-contact-profile .label, .page-civicrm-petition-sign .crm-petition-contact-profile .content, .page-civicrm-event-register .crm-profile legend {
 	display:none !important;
+}
+form#Signature div.crm-petition-form-block {
+    float: none !important;
+    width: auto !important;
+}
+.page-civicrm-petition-sign .crm-petition-activity-profile .crm-section .grippie {
+	width: 613px;
+}
+#crm-container .newDiv .label {
+    width: 14% !important;
+	text-align:left !important;
+}
+#crm-container .newDiv div.content {
+    clear: none !important;
+	margin-left:14% !important;
 }
 /*end petition*/
 
+body.page-civicrm-event div.crm-container, body.page-civicrm-petition-sign div.crm-container, body.page-civicrm-profile-create div.crm-container{
+display:block !important;
+}
+body.page-civicrm div.crm-section.title {
+display: block !important;
+}
+body.page-civicrm div.crm-section.title span{
+margin-bottom: 6px !important;
+font-family: "Pathway Gothic One", Arial, sans-serif !important;
+font-weight: normal !important;
+line-height: 1.2em !important;
+color: #333333 !important;
+font-size: 30px !important;
+margin-top: -4px !important;
+}
