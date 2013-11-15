@@ -466,7 +466,6 @@ AND field_type = 'Formatting'";
 
     case 'event':
       $params = array(
-        'id' => CRM_Utils_Array::value('event_hidden', $form_state['values']),
         'title' => $fieldArray[1],
         'summary' => $fieldArray[2],
         'description' => $fieldArray[3],
@@ -480,7 +479,10 @@ AND field_type = 'Formatting'";
         'is_active' => 1,
         'version' => 3,
       );
- 
+      if (CRM_Utils_Array::value('event_hidden', $form_state['values'])) {
+        $params['id'] = $form_state['values']['event_hidden'];
+      } 
+      
       $result = civicrm_api('event', 'create', $params);
       // create or update the address
       $addressParams = array( 
