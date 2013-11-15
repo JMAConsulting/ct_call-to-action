@@ -157,6 +157,18 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
         }
         $link = $fields[3];
         $summary = $fields[1];
+        
+        $joinParams = array(
+          'entity_id' => $actions[1],
+          'entity_table' => 'civicrm_survey',
+          'weight' => 1,
+          'module' => 'CiviCampaign',
+        );
+        $ufGroupId = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
+        if ($ufGroupId) {
+          $actions[0] = 'survey'; 
+        }
+        
         break;
 
       case 'profile':
