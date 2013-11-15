@@ -857,3 +857,23 @@ function campaigntool_form_webform_validate($form,&$form_state) {
       break;
   }
 }
+function campaigntool_civicrm_navigationMenu(&$params) {
+  global $language;
+  if ($language->language == 'fr') {
+    $unsetMenuArray = array('Correspondence', "Case Work", 'Outreach');
+  } 
+  else {
+    $unsetMenuArray = array('Correspondance', 'Dossier', 'Relations externes');
+  }
+  $count = count($unsetMenuArray);
+  
+  foreach ($params as $key => $value) {
+    if (in_array($value['attributes']['name'], $unsetMenuArray) ) {
+      $params[$key]['attributes']['active'] = 0;
+      $count--;
+      if (!$count) {
+        break;
+      }
+    }
+  }
+}
