@@ -663,6 +663,10 @@ function campaigntool_node_view($node) {
 }
 
 function campaigntool_civicrm_pageRun( &$page ) {
+  if ($page->getVar('_name') == 'CRM_Contact_Page_DashBoard') {
+    $page->assign('communityMessages', '');
+  }
+
   if ($page->getVar('_name') == 'CRM_Event_Page_EventInfo') {
     CRM_Core_Region::instance('page-body')->add(array(
         'markup' => '<p class="ical-description">Download the iCal entry or iCal feed for this event.</p>',
@@ -671,14 +675,13 @@ function campaigntool_civicrm_pageRun( &$page ) {
 }
 
 function campaigntool_civicrm_buildForm($formName, &$form) { 
-
   if ($formName == "CRM_Profile_Form_Edit" || 
     $formName == "CRM_Event_Form_Registration_Register"|| 
     $formName == "CRM_Campaign_Form_Petition_Signature") {
     CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Extra/ModifyTpl.tpl',
       ));
-     
+    global $language;
     switch ($formName) {
       case "CRM_Profile_Form_Edit":
         $afterDivname = '#crm-profile-block';
@@ -687,13 +690,13 @@ function campaigntool_civicrm_buildForm($formName, &$form) {
       case "CRM_Event_Form_Registration_Register":
         $afterDivname = '#billing-payment-block';
         $eachDivName = '.crm-profile';
-        $form->assign('buttonText', 'Register Now');
+        $form->assign('buttonText', ($language->language=='fr') ? 'Inscrivez-vous' : 'Register Now');
         break;
       case "CRM_Campaign_Form_Petition_Signature":
         $afterDivname = '.crm-petition-activity-profile';
         $eachDivName = '.crm-petition-contact-profile';
         if ($form->getVar('_activityProfileId')) {
-          $form->assign('surveyText', 'Send your Survey');
+          $form->assign('surveyText', ($language->language=='fr') ? 'Envoyez votre réponse au sondage' : 'Send your Survey');
         }
         break;
     }
