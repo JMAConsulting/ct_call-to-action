@@ -443,6 +443,9 @@ WHERE uf_group_id = {$profile->id} AND module != 'Profile'";
   elseif (CRM_Utils_Array::value('profile_hidden', $form_state['values']))  {
     $id = CRM_Utils_Array::value('profile_hidden', $form_state['values']);
     $http_value = 'profile-'.CRM_Utils_Array::value('profile_hidden', $form_state['values']);
+    $profile = new CRM_Core_BAO_UFGroup();
+    $profile->id = $id;
+    $profile->title = $fieldArray[1];
   }
   elseif (CRM_Utils_Array::value('petition_hidden', $form_state['values'])) {
     $http_value = 'petition-'.CRM_Utils_Array::value('petition_hidden', $form_state['values']);
