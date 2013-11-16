@@ -194,6 +194,8 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   ksort($locationEvents);
   $stateProvince = CRM_Core_PseudoConstant::stateProvince();
   $country = CRM_Core_PseudoConstant::country();
+
+  $config = CRM_Core_Config::singleton();
   $locations = array(
     1 => 'Create new location',
     2 => 'Use Existing Location',
@@ -304,13 +306,13 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
       '#type' => 'select',
       '#title' => t('Country'),
       '#options' => $country,
-      '#default_value' => isset($country_val) ? $country_val : 1228,
+      '#default_value' => isset($country_val) ? $country_val : $config->defaultContactCountry,
     );
   $form['location_fieldset']["state"] = array(
       '#type' => 'select',
       '#title' => t('State/Province'),
       '#options' => $stateProvince,
-      '#default_value' => isset($state) ? $state : 1001,
+      '#default_value' => isset($state) ? $state : $config->defaultContactStateProvince,
     );
   $form['location_fieldset']["email"] = array(
       '#type' => 'textfield',
