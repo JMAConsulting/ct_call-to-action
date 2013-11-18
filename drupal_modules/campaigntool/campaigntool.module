@@ -327,7 +327,8 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   $form['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description'),
-    '#default_value' => isset($description) ? strip_tags($description) : NULL,
+    '#default_value' => isset($description) ? $description : NULL,
+    '#format' => 'full_html',
   );
   $form['link'] = array(
     '#type' => 'textfield',
