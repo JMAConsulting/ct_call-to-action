@@ -120,3 +120,8 @@ color: #333333 !important;
 font-size: 30px !important;
 margin-top: -4px !important;
 }
+
+
+.page-call-to-action-entry #edit-description-format {
+  display:none !important;
+}
