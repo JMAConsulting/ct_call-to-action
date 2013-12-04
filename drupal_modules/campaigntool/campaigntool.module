@@ -140,9 +140,7 @@ function campaigntool_cta_language_form_submit($form, &$form_state){
   $ufGroup = "SELECT 
       uf.id, uf.field_name
       FROM civicrm_uf_field uf
-      LEFT JOIN civicrm_uf_join uj ON uj.uf_group_id = uf.uf_group_id
-      WHERE uj.entity_id = {$id}
-      AND uj.entity_table = '{$table}'
+      WHERE uf.id = {$id}
       AND uf.weight = {$weight}";
   $id = CRM_Core_DAO::singleValueQuery($ufGroup);
   $params[0] = array($id, 'Int');
