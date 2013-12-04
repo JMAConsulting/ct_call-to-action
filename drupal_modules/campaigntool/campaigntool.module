@@ -16,8 +16,84 @@ function campaigntool_menu() {
     'page arguments' => array(1), 
     'access callback' => TRUE
   );
+  $items['i18n/%/%/%'] = array(
+    'page callback' => 'campaigntool_cta_language',
+    'page arguments' => array(1, 2, 3, 4, 5),
+    'access callback' => TRUE
+  );
 
   return $items;
+}
+
+function campaigntool_cta_language($table, $field, $id) {
+  print drupal_render(drupal_get_form('campaigntool_cta_language_form', $table, $field, $id));
+}
+function campaigntool_cta_language_form($form, $form_state, $table, $field, $id) {
+  civicrm_initialize();
+  $config = CRM_Core_Config::singleton();
+  $locales = array_keys($config->languageLimit);
+  
+  $cols = array();
+  foreach ($locales as $locale) {
+    $cols[] = "{$field}_{$locale} {$locale}";
+  }
+  $query = 'SELECT ' . implode(', ', $cols) . " FROM $table WHERE id = $id";
+
+  $dao = new CRM_Core_DAO();
+  $dao->query($query, FALSE);
+  $dao->fetch();
+
+  $languages = CRM_Core_I18n::languages(TRUE);
+  foreach ($locales as $locale) {
+    $form["{$field}_{$locale}"] = array(
+      '#type' => 'textfield',
+      '#size' => 30,
+      '#title' => t($languages[$locale]),
+      '#default_value' => $dao->$locale,
+    );
+  }
+  $form['field'] = array(
+    '#type' => 'hidden',
+    '#title' => 'Field Hidden',
+    '#default_value' => $field,
+  );
+  $form['table'] = array(
+    '#type' => 'hidden',
+    '#title' => 'Table Hidden',
+    '#default_value' => $table,
+  );
+  $form['id'] = array(
+    '#type' => 'hidden',
+    '#title' => 'Id Hidden',
+    '#default_value' => $id,
+  );
+  $form['submit_button'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+function campaigntool_cta_language_form_submit($form, &$form_state){
+  civicrm_initialize();
+  $config = CRM_Core_Config::singleton();
+  $locales = array_keys($config->languageLimit);
+  $table  = $form_state['values']['table'];
+  $field  = $form_state['values']['field']; $cols   = array();
+  $params = array(array($form_state['values']['id'], 'Int'));
+  $i = 1;
+  foreach ($locales as $locale) {
+    $cols[] = "{$field}_{$locale} = %$i";
+    $params[$i] = array( $form_state['values']["{$field}_{$locale}"], 'String');
+    $i++;
+  }
+  $query = "UPDATE $table SET " . implode(', ', $cols) . " WHERE id = %0";
+  $dao   = new CRM_Core_DAO();
+  $query = CRM_Core_DAO::composeQuery($query, $params, TRUE);
+  $dao->query($query, FALSE);
+  
+  $form_state['redirect'] = 'call-to-action-entry/event-1';
+
 }
 
 function campaigntool_cta_delete($action) {
@@ -53,12 +129,14 @@ function campaigntool_cta_delete($action) {
 
 function campaigntool_form($form, &$form_state, $id = NULL) {
   civicrm_initialize();
+  $config = CRM_Core_Config::singleton();
   $form['#attached']['js'][] = drupal_get_path('module', 'campaigntool') . '/campaigntool.js';
   // handling an update
   if ($id) {
     $actions = explode('-', $id);
     switch($actions[0]) {
       case 'event':
+        $table = 'civicrm_event';
         $params = array(
           'id' => $actions[1],
           'version' => 3,
@@ -133,6 +211,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
         break;
 
       case 'petition': 
+        $table = 'civicrm_uf_field';
         $params = array(
           'id' => $actions[1],
           'version' => 3,
@@ -172,6 +251,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
         break;
 
       case 'profile':
+        $table = 'civicrm_uf_field';
         $params = array(
           'id' => $actions[1],
           'version' => 3,
@@ -218,14 +298,18 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   }
   $form['title'] = array(
     '#type' => 'textfield',
-    '#title' => t('Title'),
+    '#title' => isset($title) ?  t('Title')." <a href='#' id='title-field' data-id='".$event."' data-table='".$table."' data-field='title'>
+<img src='".$config->resourceBase."i/langs.png'></a>" :  t('Title'),
     '#default_value' => isset($title) ? $title : NULL,
+    '#prefix' => '<div id="locale-dialog_title"></div>',
     '#required' => TRUE,
-  ); 
+  );
   $form['summary'] = array(
     '#type' => 'textfield',
-    '#title' => t('Summary'),
+    '#title' => isset($summary) ?  t('Summary')." <a href='#' id='summary-field' data-id='".$event."' data-table='".$table."' data-field='summary'>
+<img src='".$config->resourceBase."i/langs.png'></a>" :  t('Summary'),
     '#default_value' => isset($summary) ? $summary : NULL,
+    '#prefix' => '<div id="locale-dialog_summary"></div>',
     '#required' => TRUE, 
   );
   $form['start_date'] = array(
