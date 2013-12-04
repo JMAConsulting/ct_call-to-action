@@ -9,8 +9,6 @@
 		success: function( content ) {
 		    $("#locale-dialog_" +fieldName ).dialog({
 			modal       : true,
-			width       : 350,
-			height      : 200,
 			resizable   : true,
 			bgiframe    : true,
 			overlay     : { opacity: 0.3, background: "black" },
@@ -24,11 +22,12 @@
 	    });
 	}
 
-	$('#title-field, #summary-field').click( function() {
+	$('#title-field, #summary-field, #description-field, #link-field').click( function() {
 	    var id = $(this).data('id');
 	    var table = $(this).data('table');
 	    var field = $(this).data('field');
-	    loadDialog('/i18n/'+ table +'/' + field + '/' + id, field); 
+	    var row = $(this).data('row');
+	    loadDialog('/i18n/'+ table +'/' + field + '/' + id + '/' + row, field); 
 	    return false;
 	});	
 	if ($('#edit-action-type').val() != 'event') {
