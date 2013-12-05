@@ -32,32 +32,53 @@ function campaigntool_cta_language_form($form, $form_state, $table, $field, $id,
   civicrm_initialize();
   $config = CRM_Core_Config::singleton();
   $locales = array_keys($config->languageLimit);
-  
+  if ($table == 'Profile') {
+    $field = 'help_pre';
+  }
   $cols = array();
   foreach ($locales as $locale) {
     $cols[] = "{$field}_{$locale} {$locale}";
   }
-  if ($field == 'help_pre') {
-    switch ($row) {
-      case 'description': 
-        $weight = 3;
-        break;
-      case 'link':
-        $weight = 4;
-        break;
-    }
+  $tableJoin = "";
+  if ($field != 'help_pre') {
+    $tableJoin = "AND uj.entity_table = '{$table}'";
+  } 
+  switch ($row) {
+    case 'title': 
+      $weight = 1;
+      break;
+    case 'summary':
+      $weight = 2;
+      break;
+    case 'description': 
+      $weight = 3;
+      break;
+    case 'link':
+      $weight = 4;
+      break;
+  }
+  if ($field == 'help_pre' && $table != 'Profile') {
     // get uf group id
     $ufGroup = "SELECT 
       uf.id
       FROM civicrm_uf_field uf
       LEFT JOIN civicrm_uf_join uj ON uj.uf_group_id = uf.uf_group_id
       WHERE uj.entity_id = {$id}
-      AND uj.entity_table = '{$table}'
+      {$tableJoin}
       AND uf.weight = {$weight}";
     $id = CRM_Core_DAO::singleValueQuery($ufGroup);
     if ($id) {
       $table = 'civicrm_uf_field';
     }
+  }
+  elseif($table == 'Profile') {    
+    $ufGroup = "SELECT 
+      uf.id
+      FROM civicrm_uf_field uf
+      WHERE uf.uf_group_id = {$id}
+      AND uf.weight = {$weight}";
+    $id = CRM_Core_DAO::singleValueQuery($ufGroup);
+    $table = 'civicrm_uf_field';
   }
   $query = 'SELECT ' . implode(', ', $cols) . " FROM $table WHERE id = $id";
 
@@ -107,7 +128,7 @@ function campaigntool_cta_language_form_submit($form, &$form_state){
   $config = CRM_Core_Config::singleton();
   $locales = array_keys($config->languageLimit);
   $table  = $form_state['values']['table'];
-  $field  = $form_state['values']['field']; 
+  $field  = $form_state['values']['field'];
   $row  = $form_state['values']['type']; 
   $id = $form_state['values']['id'];
   $cols   = array();
@@ -142,6 +163,15 @@ function campaigntool_cta_language_form_submit($form, &$form_state){
       FROM civicrm_uf_field uf
       WHERE uf.id = {$id}
       AND uf.weight = {$weight}";
+  if ($table == 'civicrm_event') {
+    $ufGroup = "SELECT 
+      uf.id
+      FROM civicrm_uf_field uf
+      LEFT JOIN civicrm_uf_join uj ON uj.uf_group_id = uf.uf_group_id 
+      WHERE uj.entity_id = {$id} 
+      AND uj.entity_table = 'civicrm_event'
+      AND uf.weight = {$weight}";
+  }
   $id = CRM_Core_DAO::singleValueQuery($ufGroup);
   $params[0] = array($id, 'Int');
   $i = 1;
@@ -283,8 +313,6 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
           'version' => 3,
         );
         $result = civicrm_api('survey', 'get', $params);
-        $title = $result['values'][$actions[1]]['title'];
-        $description = CRM_Utils_Array::value('instructions', $result['values'][$actions[1]]);
         $petition = $actions[1];
         // get more link
         $joinParams = array(
@@ -302,6 +330,8 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
         }
         $link = $fields[3];
         $summary = $fields[1];
+        $title = $fields[0];
+        $description = $fields[2];
         
         $joinParams = array(
           'entity_id' => $actions[1],
@@ -317,7 +347,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
         break;
 
       case 'profile':
-        $table = 'civicrm_uf_field';
+        $table = 'Profile';
         $params = array(
           'id' => $actions[1],
           'version' => 3,
@@ -362,9 +392,14 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   if (isset($actions[0])) {
     $form['action_type']['#attributes'] = array('disabled' => TRUE); 
   }
+  $title_field = 'title';
+  $summary_field = 'summary';
+  if ($table == 'civicrm_uf_field') {
+    $title_field = $summary_field = 'help_pre';
+  }
   $form['title'] = array(
     '#type' => 'textfield',
-    '#title' => isset($title) ?  t('Title')." <a href='#' id='title-field' data-id='".$actions[1]."' data-table='".$table."' data-field='title' data-row='title'>
+    '#title' => isset($title) ?  t('Title')." <a href='#' id='title-field' data-id='".$actions[1]."' data-table='".$table."' data-field='".$title_field."' data-row='title'>
 <img src='".$config->resourceBase."i/langs.png'></a>" :  t('Title'),
     '#default_value' => isset($title) ? $title : NULL,
     '#prefix' => '<div id="locale-dialog_title"></div>',
@@ -372,7 +407,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   );
   $form['summary'] = array(
     '#type' => 'textfield',
-    '#title' => isset($summary) ?  t('Summary')." <a href='#' id='summary-field' data-id='".$actions[1]."' data-table='".$table."' data-field='summary' data-row='summary'>
+    '#title' => isset($summary) ?  t('Summary')." <a href='#' id='summary-field' data-id='".$actions[1]."' data-table='".$table."' data-field='".$summary_field."' data-row='summary'>
 <img src='".$config->resourceBase."i/langs.png'></a>" :  t('Summary'),
     '#default_value' => isset($summary) ? $summary : NULL,
     '#prefix' => '<div id="locale-dialog_summary"></div>',
