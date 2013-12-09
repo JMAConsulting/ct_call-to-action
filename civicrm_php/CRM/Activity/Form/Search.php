@@ -176,6 +176,10 @@ class CRM_Activity_Form_Search extends CRM_Core_Form {
       $this->_formValues = $this->get('formValues');
     }
 
+    // CT-35 Filter set for correspondence activities
+    if (CRM_Utils_Request::retrieve('ssID', 'Positive')) {
+      $this->_ssID = 1;
+    }
     if (empty($this->_formValues)) {
       if (isset($this->_ssID)) {
         $this->_formValues = CRM_Contact_BAO_SavedSearch::getFormValues($this->_ssID);
@@ -318,10 +322,6 @@ class CRM_Activity_Form_Search extends CRM_Core_Form {
 
     if (!empty($_POST)) {
       $this->_formValues = $this->controller->exportValues($this->_name);
-    }
-    // CT-35 Filter set for correspondence activities
-    if (CRM_Utils_Request::retrieve('ssID', 'Positive')) {
-      $this->_ssID = 1;
     }
     $this->fixFormValues();
     if (isset($this->_ssID) && empty($_POST)) {
