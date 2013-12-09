@@ -225,6 +225,7 @@ function campaigntool_cta_delete($action) {
 
 function campaigntool_form($form, &$form_state, $id = NULL) {
   civicrm_initialize();
+  $table = '';
   $config = CRM_Core_Config::singleton();
   $form['#attached']['js'][] = drupal_get_path('module', 'campaigntool') . '/campaigntool.js';
   // handling an update
