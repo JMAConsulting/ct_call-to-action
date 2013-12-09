@@ -265,7 +265,6 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
             $city = CRM_Utils_Array::value('city', $address['values'][$address['id']]);
             $state = CRM_Utils_Array::value('state', $address['values'][$address['id']]);
             $zip = CRM_Utils_Array::value('postal_code', $address['values'][$address['id']]);
-            $suffix = CRM_Utils_Array::value('postal_code_suffix', $address['values'][$address['id']]);
             $country_val = CRM_Utils_Array::value('country_id', $address['values'][$address['id']]);
           }
           // fetch the phone
@@ -377,10 +376,10 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     2 => 'Use Existing Location',
   );
   $options = array(
-    'event' => 'Event',
-    'petition' => 'Petition',
-    'subscription' => 'Subscription',
-    'survey' => 'Survey',
+    'event' => t('Event'),
+    'petition' => t('Petition'),
+    'subscription' => t('Subscription'),
+    'survey' => t('Survey'),
   );
   $form['action_type'] = array(
     '#type' => 'select',
@@ -464,12 +463,12 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     );
   $form['location_fieldset']["add1_address"] = array(
       '#type' => 'textfield',
-      '#title' => t("Addt'l Address 1"),
+      '#title' => t("Supplemental Address 1"),
       '#default_value' => isset($add1_address) ? $add1_address : NULL,
     );
   $form['location_fieldset']["add2_address"] = array(
       '#type' => 'textfield',
-      '#title' => t("Addt'l Address 2"),
+      '#title' => t("Supplemental Address 2"),
       '#default_value' => isset($add2_address) ? $add2_address : NULL,
     );
   $form['location_fieldset']["city"] = array(
@@ -481,11 +480,6 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
       '#type' => 'textfield',
       '#title' => t('ZipCode'),
       '#default_value' => isset($zip) ? $zip : NULL,
-    );
-  $form['location_fieldset']["suffix"] = array(
-      '#type' => 'textfield',
-      '#title' => t('Suffix'),
-      '#default_value' => isset($suffix) ? $suffix : NULL,
     );
   $form['location_fieldset']["country"] = array(
       '#type' => 'select',
@@ -590,7 +584,6 @@ function address_fill_callback($form, &$form_state) {
   $form['location_fieldset']["add2_address"]['#value'] = $address['values'][$addressId]['supplementary_address_2'];
   $form['location_fieldset']["city"]['#value'] = $address['values'][$addressId]['city'];
   $form['location_fieldset']["zip"]['#value'] = $address['values'][$addressId]['postal_code'];
-  $form['location_fieldset']["suffix"]['#value'] = $address['values'][$addressId]['postal_code_suffix'];
   $form['location_fieldset']["country"]['#value'] = $address['values'][$addressId]['country_id'];
   $form['location_fieldset']["state"]['#value'] = $address['values'][$addressId]['state_province_id'];
   $form['location_fieldset']["email"]['#value'] = $email['values'][$emailId]['email'];
@@ -697,7 +690,6 @@ AND field_type = 'Formatting'";
         'supplemental_address_1' => $form_state['values']['add1_address'],
         'supplemental_address_2' => $form_state['values']['add2_address'],
         'postal_code' => $form_state['values']['zip'],
-        'postal_code_suffix' => $form_state['values']['suffix'],
         'country_id' => $form_state['values']['country'],
         'state_province_id' => $form_state['values']['state'],
         'city' => $form_state['values']['city'],
@@ -869,6 +861,9 @@ function campaigntool_civicrm_pageRun( &$page ) {
 }
 
 function campaigntool_civicrm_buildForm($formName, &$form) { 
+  if ($formName == "CRM_Activity_Form_Activity" && CRM_Utils_Request::retrieve('menu', 'Positive')) {
+    $form->setDefaults(array('activity_type_id' => 46));
+  }
   if ($formName == "CRM_Profile_Form_Edit" || 
     $formName == "CRM_Event_Form_Registration_Register"|| 
     $formName == "CRM_Campaign_Form_Petition_Signature") {
