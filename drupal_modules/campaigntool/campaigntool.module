@@ -192,6 +192,13 @@ function campaigntool_cta_language_form_submit($form, &$form_state){
 
 }
 
+function state_fill_callback($form, &$form_state) {
+  civicrm_initialize();
+  $states = CRM_Core_PseudoConstant::stateProvinceForCountry($form_state['values']['country']);
+  $form['location_fieldset']["state"]['#options'] = $states;
+  return $form['location_fieldset']["state"];
+}
+
 function campaigntool_cta_delete($action) {
   civicrm_initialize();
   $id = explode('-', $action);
@@ -487,12 +494,20 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
       '#title' => t('Country'),
       '#options' => $country,
       '#default_value' => isset($country_val) ? $country_val : $config->defaultContactCountry,
+      '#ajax' =>  array(
+        'callback' => 'state_fill_callback',
+        'wrapper' => 'street-wrapper',
+        'method' => 'replace',
+      ),
     );
   $form['location_fieldset']["state"] = array(
       '#type' => 'select',
       '#title' => t('State/Province'),
       '#options' => $stateProvince,
+      '#validated' => TRUE,
       '#default_value' => isset($state) ? $state : $config->defaultContactStateProvince,
+      '#prefix' => '<div id="street-wrapper">',
+      '#suffix' => '</div>',
     );
   $form['location_fieldset']["email"] = array(
       '#type' => 'textfield',
