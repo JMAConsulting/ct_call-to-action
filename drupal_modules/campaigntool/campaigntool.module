@@ -380,8 +380,8 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
 
   $config = CRM_Core_Config::singleton();
   $locations = array(
-    1 => 'Create new location',
-    2 => 'Use Existing Location',
+    1 => t('Create new location'),
+    2 => t('Use Existing Location'),
   );
   $options = array(
     'event' => t('Event'),
@@ -414,8 +414,8 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
   );
   $form['summary'] = array(
     '#type' => 'textfield',
-    '#title' => isset($summary) ?  t('Summary')." <a href='#' id='summary-field' data-id='".$actions[1]."' data-table='".$table."' data-field='".$summary_field."' data-row='summary'>
-<img src='".$config->resourceBase."i/langs.png'></a>" :  t('Summary'),
+    '#title' => isset($summary) ?  t('Subhead')." <a href='#' id='summary-field' data-id='".$actions[1]."' data-table='".$table."' data-field='".$summary_field."' data-row='summary'>
+<img src='".$config->resourceBase."i/langs.png'></a>" :  t('Subhead'),
     '#default_value' => isset($summary) ? $summary : NULL,
     '#prefix' => '<div id="locale-dialog_summary"></div>',
     '#required' => TRUE, 
