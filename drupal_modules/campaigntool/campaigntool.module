@@ -16,6 +16,11 @@ function campaigntool_menu() {
     'page arguments' => array(1), 
     'access callback' => TRUE
   );
+  $items['call-to-action-disable/%/%'] = array(
+    'page callback' => 'campaigntool_cta_disable',
+    'page arguments' => array(1, 2), 
+    'access callback' => TRUE
+  );
   $items['i18n/%/%/%/%'] = array(
     'page callback' => 'campaigntool_cta_language',
     'page arguments' => array(1, 2, 3, 4),
@@ -197,6 +202,31 @@ function state_fill_callback($form, &$form_state) {
   $states = CRM_Core_PseudoConstant::stateProvinceForCountry($form_state['values']['country']);
   $form['location_fieldset']["state"]['#options'] = $states;
   return $form['location_fieldset']["state"];
+}
+
+function campaigntool_cta_disable($action, $status) {
+  civicrm_initialize();
+  $id = explode('-', $action);
+  if ($status == 1) {
+    $status = 0;
+  }
+  else {
+    $status = 1;
+  }
+  if ($id[0] == 'event') {
+    $result = CRM_Event_BAO_Event::setIsActive($id[1], $status);
+  }
+  elseif($id[0] == 'petition') { 
+    $result = CRM_Campaign_BAO_Survey::setIsActive($id[1], $status);
+  }
+  elseif($id[0] == 'profile') {
+    $result = CRM_Core_BAO_UFGroup::setIsActive($id[1], $status);
+  }
+
+  if ($result) {
+    echo 1;
+  }
+  CRM_Utils_System::civiExit();
 }
 
 function campaigntool_cta_delete($action) {
