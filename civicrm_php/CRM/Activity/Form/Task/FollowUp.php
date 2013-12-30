@@ -208,18 +208,6 @@ class CRM_Activity_Form_Task_FollowUp extends CRM_Activity_Form_Task {
    * @access public
    */
   function preProcess() {
-    $this->_cdType = CRM_Utils_Array::value('type', $_GET);
-    $this->assign('cdType', FALSE);
-    if ($this->_cdType) {
-      $this->assign('cdType', TRUE);
-      return CRM_Custom_Form_CustomData::preProcess($this);
-    }
-
-    $this->_atypefile = CRM_Utils_Array::value('atypefile', $_GET);
-    $this->assign('atypefile', FALSE);
-    if ($this->_atypefile) {
-      $this->assign('atypefile', TRUE);
-    }
 
     $session = CRM_Core_Session::singleton();
     $this->_currentUserId = $session->get('userID');
@@ -351,13 +339,6 @@ class CRM_Activity_Form_Task_FollowUp extends CRM_Activity_Form_Task {
     $this->assign('single', $this->_single);
     $this->assign('action', $this->_action);
 
-    if ($this->_action & CRM_Core_Action::VIEW) {
-      // get the tree of custom fields
-      $this->_groupTree = &CRM_Core_BAO_CustomGroup::getTree('Activity', $this,
-        $this->_activityId, 0, $this->_activityTypeId
-      );
-    }
-
     if ($this->_activityTypeId) {
       //set activity type name and description to template
       list($this->_activityTypeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($this->_activityTypeId);
@@ -433,37 +414,8 @@ class CRM_Activity_Form_Task_FollowUp extends CRM_Activity_Form_Task {
     if (!$this->_activityTypeId) {
       $this->_activityTypeId = CRM_Utils_Array::value('activity_type_id', $_POST);
     }
-    // when custom data is included in this page
-    if (CRM_Utils_Array::value('hidden_custom', $_POST)) {
-      // we need to set it in the session for the below code to work
-      // CRM-3014
-      //need to assign custom data subtype to the template
-      $this->set('type', 'Activity');
-      $this->set('subType', $this->_activityTypeId);
-      $this->set('entityId', $this->_activityId);
-      CRM_Custom_Form_CustomData::preProcess($this);
-      CRM_Custom_Form_CustomData::buildQuickForm($this);
-      CRM_Custom_Form_CustomData::setDefaultValues($this);
-    }
-
-    // add attachments part
-    CRM_Core_BAO_File::buildAttachment($this, 'civicrm_activity', $this->_activityId, NULL, TRUE);
-
-    // figure out the file name for activity type, if any
-    if ($this->_activityTypeId &&
-      $this->_activityTypeFile =
-        CRM_Activity_BAO_Activity::getFileForActivityTypeId($this->_activityTypeId, $this->_crmDir)
-    ) {
-      $this->assign('activityTypeFile', $this->_activityTypeFile);
-      $this->assign('crmDir', $this->_crmDir);
-    }
 
     $this->setFields();
-
-    if ($this->_activityTypeFile) {
-      $className = "CRM_{$this->_crmDir}_Form_Activity_{$this->_activityTypeFile}";
-      $className::preProcess($this);
-    }
 
     $this->_values = $this->get('values');
     if (!is_array($this->_values)) {
@@ -506,9 +458,6 @@ WHERE  activity_id IN ( $IDs ) AND
    * @return None
    */
   function setDefaultValues() {
-    if ($this->_cdType) {
-      return CRM_Custom_Form_CustomData::setDefaultValues($this);
-    }
     
     $defaults = $this->_values;
 
@@ -632,10 +581,6 @@ WHERE  activity_id IN ( $IDs ) AND
       $this->assign('with', implode(', ', $withArray));
     }
 
-    if ($this->_cdType) {
-      return CRM_Custom_Form_CustomData::buildQuickForm($this);
-    }
-
     //build other activity links
     CRM_Activity_Form_ActivityLinks::commonBuildQuickForm($this);
 
@@ -643,11 +588,7 @@ WHERE  activity_id IN ( $IDs ) AND
     $this->assign('suppressForm', FALSE);
 
     $element = & $this->add('select', 'activity_type_id', ts('Activity Type'),
-      $this->_fields['followup_activity_type_id']['attributes'],
-      FALSE, array(
-        'onchange' =>
-        "CRM.buildCustomData( 'Activity', this.value );",
-      )
+      $this->_fields['followup_activity_type_id']['attributes']
     );
 
     //freeze for update mode.
@@ -873,22 +814,6 @@ WHERE  activity_id IN ( $IDs ) AND
    * @return None
    */
   public function postProcess($params = NULL) {
-    if ($this->_action & CRM_Core_Action::DELETE) {
-      $deleteParams = array('id' => $this->_activityId);
-      $moveToTrash = CRM_Case_BAO_Case::isCaseActivity($this->_activityId);
-      CRM_Activity_BAO_Activity::deleteActivity($deleteParams, $moveToTrash);
-
-      // delete tags for the entity
-      $tagParams = array(
-        'entity_table' => 'civicrm_activity',
-        'entity_id' => $this->_activityId
-      );
-
-      CRM_Core_BAO_EntityTag::del($tagParams);
-
-      CRM_Core_Session::setStatus(ts("Selected Activity has been deleted successfully."), ts('Record Deleted'), 'success');
-      return;
-    }
 
     // store the submitted values in an array
     if (!$params) {
@@ -976,8 +901,6 @@ WHERE  activity_id IN ( $IDs ) AND
     $assigneeID = CRM_Utils_Array::key('Activity Assignees', $activityContacts);
     // format assignee params
     if (!CRM_Utils_Array::crmIsEmptyArray($params['assignee_contact_id'])) {
-      //skip those assignee contacts which are already assigned
-      //while sending a copy.CRM-4509.
       $activityAssigned = array_flip($params['assignee_contact_id']);
       if ($this->_activityId) {
         $assigneeContacts = CRM_Activity_BAO_ActivityContact::getNames($this->_activityId, $assigneeID);
