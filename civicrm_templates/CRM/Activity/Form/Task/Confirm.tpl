@@ -23,9 +23,7 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
-{capture assign=infoTitle}{ts}Warning{/ts}{/capture}
-{capture assign=infoMessage}{ts}{$alertMessage}{/ts}{/capture}
-{include file="CRM/common/info.tpl" infoType="alert"}
+<div class="status">{ts}{$alertMessage}{/ts}</div>
 <div class="crm-form crm-form-block crm-pick-option-form-block">
 <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
 </div>
