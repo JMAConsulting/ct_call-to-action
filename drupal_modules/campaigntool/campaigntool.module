@@ -918,7 +918,6 @@ function campaigntool_civicrm_buildForm($formName, &$form) {
     $form->assign('assignee_contact', CRM_Activity_Form_Activity::formatContactValues($assignee_contact_names));
     
     $form->removeElement('campaign_id');
-    $form->removeElement('engagement_level');
     $form->removeElement('location');
     $form->removeElement('duration');
     
