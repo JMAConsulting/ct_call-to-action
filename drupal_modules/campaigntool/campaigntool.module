@@ -907,9 +907,24 @@ function campaigntool_civicrm_pageRun( &$page ) {
 }
 
 function campaigntool_civicrm_buildForm($formName, &$form) { 
-  if ($formName == "CRM_Activity_Form_Activity" && CRM_Utils_Request::retrieve('menu', 'Positive')) {
-    $form->setDefaults(array('activity_type_id' => 46));
+  if ($formName == "CRM_Activity_Form_Activity" && $form->_action & CRM_Core_Action::ADD
+      && CRM_Utils_Request::retrieve('atype', 'Positive')) {
+    
+    $assignee_contact_names[$form->_currentUserId] =  CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact',
+      $form->_currentUserId,
+      'sort_name',
+      'id'
+    );
+    $form->assign('assignee_contact', CRM_Activity_Form_Activity::formatContactValues($assignee_contact_names));
+    
+    $form->removeElement('campaign_id');
+    $form->removeElement('engagement_level');
+    $form->removeElement('location');
+    $form->removeElement('duration');
+    
+    $form->setDefaults(array('status_id' => array_search('Completed', CRM_Core_PseudoConstant::activityStatus('name'))));
   }
+  
   if ($formName == "CRM_Profile_Form_Edit" || 
     $formName == "CRM_Event_Form_Registration_Register"|| 
     $formName == "CRM_Campaign_Form_Petition_Signature") {
