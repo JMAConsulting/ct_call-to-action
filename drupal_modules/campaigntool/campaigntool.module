@@ -714,7 +714,7 @@ AND field_type = 'Formatting'";
         'title' => $fieldArray[1],
         'summary' => $fieldArray[2],
         'description' => $fieldArray[3],
-        'event_type_id' => 1,
+        'event_type_id' => 3,
         'start_date' => date($form_state['values']['start_date']),
         'end_date' => date($form_state['values']['end_date']),
         'loc_block_id' => ($form_state['values']['location'] != 0) ? $form_state['values']['location'] : NULL,
