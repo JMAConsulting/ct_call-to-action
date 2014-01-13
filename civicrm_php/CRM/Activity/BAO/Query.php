@@ -143,6 +143,12 @@ class CRM_Activity_BAO_Query {
       $query->_element['source_contact'] = 1;
       $query->_tables['source_contact'] = $query->_whereTables['source_contact'] = 1;
     }
+
+    if (CRM_Utils_Array::value('parent_id', $query->_returnProperties)) {
+      $query->_tables['parent_id'] = 1;
+      $query->_whereTables['parent_id'] = 1;
+      $query->_element['parent_id'] = 1;
+    }
   }
 
   /**
@@ -357,12 +363,14 @@ class CRM_Activity_BAO_Query {
         break;
 
      case 'parent_id':
+       $query->_where[$grouping][] = "civicrm_activity.parent_id IS NULL";
        if ($value == 1) {
-         $query->_where[$grouping][] = "civicrm_activity.parent_id IS NOT NULL";
-         $query->_qill[$grouping][] = ts('Activities with Followup Activities');
+         $query->_where[$grouping][] = "parent_id.parent_id IS NOT NULL";
+         $query->_qill[$grouping][] = ts('Activities which have Followup Activities');
        }
        elseif ($value == 2) {
-         $query->_where[$grouping][] = "civicrm_activity.parent_id IS NULL";
+         $query->_where[$grouping][] = "parent_id.parent_id IS NULL";
+         $query->_qill[$grouping][] = ts('Activities without Followup Activities');
        }
        break;
       
@@ -413,6 +421,10 @@ class CRM_Activity_BAO_Query {
 
       case 'source_contact':
         $from = " $side JOIN civicrm_contact source_contact ON source_contact.id = civicrm_activity_contact.contact_id";
+        break;
+
+      case 'parent_id':
+        $from = "$side JOIN civicrm_activity as parent_id ON civicrm_activity.id = parent_id.parent_id";
         break;
     }
 
