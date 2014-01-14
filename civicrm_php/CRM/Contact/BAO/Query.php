@@ -4143,7 +4143,6 @@ civicrm_relationship.start_date > {$today}
       $sql .= " LIMIT $offset, $row_count ";
     }
 
-    CRM_Core_Error::debug( '$sql', $sql );
     $dao = CRM_Core_DAO::executeQuery($sql);
 
     $values = array();
