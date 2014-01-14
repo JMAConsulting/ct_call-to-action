@@ -210,13 +210,13 @@ class CRM_Report_Form_ActivitiesSummary extends CRM_Report_Form {
     }
 
 
-    $select[] = "SUM(CASE WHEN {$this->_aliases['civicrm_activity']}.status_id = 2 THEN 1 ELSE 0 END) as complete_id";
+    $select[] = "SUM(CASE WHEN {$this->_aliases['civicrm_activity']}.status_id IN (2, 3, 5, 6, 8) THEN 1 ELSE 0 END) as complete_id";
     $this->_columnHeaders["complete_id"]['type'] = CRM_Utils_Type::T_INT;
     $this->_columnHeaders["complete_id"]['title'] = 'Complete';
-    $select[] = "SUM(CASE WHEN {$this->_aliases['civicrm_activity']}.status_id != 2 THEN 1 ELSE 0 END) as incomplete_id";
+    $select[] = "SUM(CASE WHEN {$this->_aliases['civicrm_activity']}.status_id IN (1, 4, 7) THEN 1 ELSE 0 END) as incomplete_id";
     $this->_columnHeaders["incomplete_id"]['type'] = CRM_Utils_Type::T_INT;
     $this->_columnHeaders["incomplete_id"]['title'] = 'Incomplete';
-    $select[] = "SUM(CASE WHEN ({$this->_aliases['civicrm_activity']}.status_id != 2 AND {$this->_aliases['civicrm_activity']}.activity_date_time < NOW()) THEN 1 ELSE 0 END) as overdue_id";
+    $select[] = "SUM(CASE WHEN ({$this->_aliases['civicrm_activity']}.status_id IN (1, 4, 7) AND {$this->_aliases['civicrm_activity']}.activity_date_time < NOW()) THEN 1 ELSE 0 END) as overdue_id";
     $this->_columnHeaders["overdue_id"]['type'] = CRM_Utils_Type::T_INT;
     $this->_columnHeaders["overdue_id"]['title'] = 'Overdue';
     $this->_select = "SELECT " . implode(', ', $select) . " ";
