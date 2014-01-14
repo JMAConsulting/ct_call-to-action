@@ -908,7 +908,7 @@ function campaigntool_civicrm_pageRun( &$page ) {
 
 function campaigntool_civicrm_buildForm($formName, &$form) { 
   if ($formName == 'CRM_Activity_Form_Search' && CRM_Utils_Request::retrieve('ssID', 'Positive')) {
-    $defaults['activity_type_id']$form->_formValues['activity_type_id'];
+    $defaults['activity_type_id'] = $form->_formValues['activity_type_id'];
     $defaults['parent_id'] = $form->_formValues['parent_id'];
     $form->setDefaults($defaults);
   }
