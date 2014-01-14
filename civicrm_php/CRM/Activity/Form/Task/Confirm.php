@@ -75,11 +75,13 @@ class CRM_Activity_Form_Task_Confirm extends CRM_Activity_Form_Task {
     CRM_Utils_System::setTitle(ts('Create Followup Activities?'));
     // Check if activities are followup activities
     $this->_countInvalid = 0;
-    foreach ($this->_activityHolderIds as $key => $activityId) {
-      $isFollowUp = CRM_Core_DAO::getFieldValue('CRM_Activity_DAO_Activity', $activityId, 'parent_id');
-      if ($isFollowUp) {
-        unset($this->_activityHolderIds[$key]);
+    $sql = "SELECT id, parent_id FROM civicrm_activity WHERE parent_id IN (".implode(', ', $this->_activityHolderIds).")";
+    $result = CRM_Core_DAO::executeQuery($sql);
+    $this->_originalSelected = count($this->_activityHolderIds);
+    while ($result->fetch()) {
+      if(($key = array_search($result->parent_id, $this->_activityHolderIds)) !== FALSE) {
         $this->_countInvalid++;
+        unset($this->_activityHolderIds[$key]);
       }
     }
   }
@@ -93,14 +95,41 @@ class CRM_Activity_Form_Task_Confirm extends CRM_Activity_Form_Task {
    */
   function buildQuickForm() {
     $message = '';
-    if ($this->_countInvalid) {
-      $message = $this->_countInvalid.' of the '.count($this->_activityHolderIds).' selected Activities cannot have a Follow-up Activity added since they already have one.';
+    $continue = FALSE;
+    if ($this->_countInvalid && $this->_activityHolderIds) {
+      $message = $this->_countInvalid.' of the '.$this->_originalSelected.' selected Activities cannot have a Follow-up Activity added since they already have one.';
+    }
+    else if ($this->_countInvalid && !$this->_activityHolderIds) {
+      $message = 'The '.$this->_countInvalid.' selected Activities cannot have a Follow-up Activity added since they already have one.';
     }
     if ($this->_countInvalid < count($this->_activityHolderIds)) {
-      $message .= 'Would you like to create follow-up activities for '.(count($this->_activityHolderIds) - $this->_countInvalid).' of the '.count($this->_activityHolderIds).' selected Activities that do not yet have Follow-up Activities?';
+      $message .= 'Would you like to create follow-up activities for '.(count($this->_activityHolderIds) - $this->_countInvalid).' of the '.$this->_originalSelected.' selected Activities that do not yet have Follow-up Activities?';  
+      $continue = TRUE;
     }
     $this->assign('alertMessage', $message);
-    $this->addDefaultButtons(ts('Continue >>'));
+    if ($continue) {
+      $this->addButtons(array(
+        array(
+          'type' => 'next',
+          'name' => 'Continue >>',
+          'isDefault' => TRUE,
+        ),
+        array(
+          'type' => 'back',
+          'name' => ts('Cancel'),
+        ),
+      )
+     );
+    }
+    else {
+      $this->addButtons(array(
+        array(
+          'type' => 'back',
+          'name' => ts('Cancel'),
+        ),
+      )
+    );
+    }
   }
 }
 
