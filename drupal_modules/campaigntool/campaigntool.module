@@ -907,9 +907,37 @@ function campaigntool_civicrm_pageRun( &$page ) {
 }
 
 function campaigntool_civicrm_buildForm($formName, &$form) { 
+  if ($formName == "CRM_Activity_Form_Activity") {
+     CRM_Core_Region::instance('page-body')->add(array(
+        'script' => "
+cj('.crm-activity-form-block-schedule_followup div.crm-accordion-wrapper').removeClass('collapsed');
+cj( document ).ajaxComplete(function() { 
+  if (cj('.crm-activity-form-block-custom_data #Communications').length && !cj('.new-added-row').length) {
+    var obj = cj('#Communications .custom_field-row .html-adjust select').parents('tr');
+    var html = '<tr class =". '"custom_field-row new-added-row"' . ">' + obj.html() + '</tr>';
+    cj('.crm-activity-form-block-custom_data #Communications').remove();
+    cj(html).insertAfter('.crm-activity-form-block-activity_type_id');
+  }
+});
+cj('.crm-activity-form-block-activity_type_id select').change(function() {
+  if (cj(this).val() == 46) {
+    cj('.new-added-row').show();
+  }
+  else {
+    cj('.new-added-row').hide();
+    cj('.new-added-row select').val('');
+  }
+});
+",
+        'css' => "
+.page-civicrm-activity form.Activity .crm-activity-form-block-campaign_id {
+  display:none !important; 
+}",
+      ));
+  }
+
   if ($formName == "CRM_Activity_Form_Activity" && $form->_action & CRM_Core_Action::ADD
       && CRM_Utils_Request::retrieve('atype', 'Positive')) {
-    
     $assignee_contact_names[$form->_currentUserId] =  CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact',
       $form->_currentUserId,
       'sort_name',
