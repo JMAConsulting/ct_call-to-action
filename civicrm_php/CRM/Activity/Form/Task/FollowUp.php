@@ -66,6 +66,12 @@ class CRM_Activity_Form_Task_FollowUp extends CRM_Activity_Form_Task {
    * @var string
    */
   public $_activityTypeName;
+  /**
+   * The target contact Ids for activities
+   *
+   * @var array
+   */
+  public $_targetContactIDs;
 
   /**
    * The id of currently viewed contact
@@ -184,7 +190,6 @@ class CRM_Activity_Form_Task_FollowUp extends CRM_Activity_Form_Task {
         ) +
         CRM_Core_PseudoConstant::ActivityType(FALSE)
       ),
-      // Add optional 'Subject' field for the Follow-up Activiity, CRM-4491
       'followup_activity_subject' => array(
         'type' => 'text',
         'label' => ts('Subject'),
@@ -238,12 +243,6 @@ class CRM_Activity_Form_Task_FollowUp extends CRM_Activity_Form_Task {
 
     $this->assign('context', $this->_context);
 
-    //CRM-6957
-    //when we come from contact search, activity id never comes.
-    //so don't try to get from object, it might gives you wrong one.
-
-    // if we're not adding new one, there must be an id to
-    // an activity we're trying to work on.
     if ($this->_action != CRM_Core_Action::ADD &&
       get_class($this->controller) != 'CRM_Contact_Controller_Search'
     ) {
@@ -253,7 +252,6 @@ class CRM_Activity_Form_Task_FollowUp extends CRM_Activity_Form_Task {
     $this->_activityTypeId = CRM_Utils_Request::retrieve('atype', 'Positive', $this);
     $this->assign('atype', $this->_activityTypeId);
 
-    //check for required permissions, CRM-6264
     if ($this->_activityId &&
       in_array($this->_action, array(
         CRM_Core_Action::UPDATE,
@@ -438,7 +436,7 @@ class CRM_Activity_Form_Task_FollowUp extends CRM_Activity_Form_Task {
     $activityContacts = CRM_Core_OptionGroup::values('activity_contacts', FALSE, FALSE, FALSE, NULL, 'name');
     $sourceID = CRM_Utils_Array::key($type, $activityContacts);
     $query = "
-SELECT contact_id
+SELECT contact_id, activity_id
 FROM   civicrm_activity_contact
 WHERE  activity_id IN ( $IDs ) AND
        record_type_id = {$sourceID}";
@@ -446,6 +444,9 @@ WHERE  activity_id IN ( $IDs ) AND
     $dao = CRM_Core_DAO::executeQuery($query);
     while ($dao->fetch()) {
       $contactIDs[] = $dao->contact_id;
+      if ($type == "Activity Targets") {
+        $this->_targetContactIDs[$dao->activity_id][] = $dao->contact_id;
+      }
     }
     return $contactIDs;
   }
@@ -616,10 +617,8 @@ WHERE  activity_id IN ( $IDs ) AND
       }
     }
 
-    //CRM-7362 --add campaigns.
     CRM_Campaign_BAO_Campaign::addCampaign($this, CRM_Utils_Array::value('campaign_id', $this->_values));
 
-    //add engagement level CRM-7775
     $buildEngagementLevel = FALSE;
     if (CRM_Campaign_BAO_Campaign::isCampaignEnable() &&
       CRM_Campaign_BAO_Campaign::accessCampaign()
@@ -770,14 +769,11 @@ WHERE  activity_id IN ( $IDs ) AND
       $errors['activity_type_id'] = ts('Activity Type is a required field');
     }
 
-    //Activity type is mandatory if creating new activity, CRM-4515
     if (array_key_exists('activity_type_id', $fields) &&
       !CRM_Utils_Array::value('activity_type_id', $fields)
     ) {
       $errors['activity_type_id'] = ts('Activity Type is required field.');
     }
-    //FIX me temp. comment
-    // make sure if associated contacts exist
 
     if ($fields['source_contact_id'] && !is_numeric($fields['source_contact_qid'])) {
       $errors['source_contact_id'] = ts('Source Contact non-existent!');
@@ -797,7 +793,6 @@ WHERE  activity_id IN ( $IDs ) AND
     if (CRM_Utils_Array::value('followup_activity_type_id', $fields) && !CRM_Utils_Array::value('followup_date', $fields)) {
       $errors['followup_date_time'] = ts('Followup date is a required field.');
     }
-    //Activity type is mandatory if subject or follow-up date is specified for an Follow-up activity, CRM-4515
     if ((CRM_Utils_Array::value('followup_activity_subject', $fields) || CRM_Utils_Array::value('followup_date', $fields)) &&
       !CRM_Utils_Array::value('followup_activity_type_id', $fields)
     ) {
@@ -871,19 +866,12 @@ WHERE  activity_id IN ( $IDs ) AND
       $params['target_contact_id'] = $this->_targetContactId;
     }
     $activity = array();
-    if (CRM_Utils_Array::value('is_multi_activity', $params) &&
-      !CRM_Utils_Array::crmIsEmptyArray($params['target_contact_id'])
-    ) {
+    if (!CRM_Utils_Array::crmIsEmptyArray($params['target_contact_id'])) {
       $targetContacts = $params['target_contact_id'];
-      foreach ($targetContacts as $targetContactId) {
-        $params['target_contact_id'] = array($targetContactId);
+      foreach ($this->_activityHolderIds as $activityId) {
         // save activity
-        $activity[] = $this->processActivity($params);
+        $activity[] = $this->processActivity($params, $activityId);
       }
-    }
-    else {
-      // save activity
-      $activity = $this->processActivity($params);
     }
 
     return array('activity' => $activity);
@@ -895,7 +883,7 @@ WHERE  activity_id IN ( $IDs ) AND
    * @param array $params associated array of submitted values
    * @access protected
    */
-  protected function processActivity(&$params) {
+  protected function processActivity(&$params, $activityId) {
     $activityAssigned = array();
     $activityContacts = CRM_Core_OptionGroup::values('activity_contacts', FALSE, FALSE, FALSE, NULL, 'name');
     $assigneeID = CRM_Utils_Array::key('Activity Assignees', $activityContacts);
@@ -908,19 +896,16 @@ WHERE  activity_id IN ( $IDs ) AND
       }
     }
 
-    foreach ($this->_activityHolderIds as $activityId) {
-      $activities[] = $activity = CRM_Activity_BAO_Activity::createFollowupActivity($activityId, $params);
+    if (CRM_Utils_Array::value('is_multi_activity', $params)) {
+      $params['target_contact_id'] = $this->_targetContactIDs[$activityId];
+    }
+    else {
+      $params['target_contact_id'] = $this->_targetContactId;
+    }
+    $activities[] = $activity = CRM_Activity_BAO_Activity::createFollowupActivity($activityId, $params);
 
-      // CRM-9590
-      if (CRM_Utils_Array::value('is_multi_activity', $params)) {
-        $this->_activityIds[] = $activity->id;
-      }
-      else {
-        $this->_activityId = $activity->id;
-      }
-
-      // send copy to assignee contacts.CRM-4509
-      $mailStatus = '';
+    $this->_activityIds[] = $activity->id; 
+    $mailStatus = '';
 
       if (!CRM_Utils_Array::crmIsEmptyArray($params['assignee_contact_id']) &&
         CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
@@ -944,7 +929,6 @@ WHERE  activity_id IN ( $IDs ) AND
           $ics = new CRM_Activity_BAO_ICalendar($activity);
           $ics->addAttachment($attachments, $mailToContacts);
 
-          // CRM-8400 add param with _currentlyViewedContactId for URL link in mail
           CRM_Case_BAO_Case::sendActivityCopy(NULL, $activity->id, $mailToContacts, $attachments, NULL);
 
           $ics->cleanup();
@@ -968,7 +952,6 @@ WHERE  activity_id IN ( $IDs ) AND
           )
         ), ts('Saved'), 'success');
 
-    }
     return $activities;
   }
 
