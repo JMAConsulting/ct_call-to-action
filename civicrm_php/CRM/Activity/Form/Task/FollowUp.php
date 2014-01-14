@@ -434,7 +434,7 @@ class CRM_Activity_Form_Task_FollowUp extends CRM_Activity_Form_Task {
 
   public function setRelatedIDs($type) {
     $IDs = implode(',', $this->_activityHolderIds);
-
+    $contactIDs = array();
     $activityContacts = CRM_Core_OptionGroup::values('activity_contacts', FALSE, FALSE, FALSE, NULL, 'name');
     $sourceID = CRM_Utils_Array::key($type, $activityContacts);
     $query = "
