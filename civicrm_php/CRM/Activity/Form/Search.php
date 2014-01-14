@@ -178,7 +178,7 @@ class CRM_Activity_Form_Search extends CRM_Core_Form {
 
     // CT-35 Filter set for correspondence activities
     if (CRM_Utils_Request::retrieve('ssID', 'Positive')) {
-      $this->_ssID = 1;
+      $this->_ssID = CRM_Utils_Request::retrieve('ssID', 'Positive');
     }
     if (empty($this->_formValues)) {
       if (isset($this->_ssID)) {
