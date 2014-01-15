@@ -362,7 +362,6 @@ class CRM_Activity_BAO_Query {
         break;
 
      case 'parent_id':
-       $query->_where[$grouping][] = "civicrm_activity.parent_id IS NULL";
        if ($value == 1) {
          $query->_where[$grouping][] = "parent_id.parent_id IS NOT NULL";
          $query->_qill[$grouping][] = ts('Activities which have Followup Activities');
