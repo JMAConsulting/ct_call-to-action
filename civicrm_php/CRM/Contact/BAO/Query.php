@@ -1614,6 +1614,7 @@ class CRM_Contact_BAO_Query {
       case 'activity_date_high':
       case 'activity_role':
       case 'activity_status':
+      case 'followup_parent_id':
       case 'parent_id':
       case 'activity_subject':
       case 'test_activities':

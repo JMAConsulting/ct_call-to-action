@@ -185,7 +185,6 @@ class CRM_Activity_BAO_Query {
     if ($query->_mode & CRM_Contact_BAO_Query::MODE_ACTIVITY) {
       $query->_skipDeleteClause = TRUE;
     }
-
     switch ($name) {
       case 'activity_type_id':
         $types = CRM_Core_PseudoConstant::activityType(TRUE, TRUE, FALSE, 'label', TRUE);
@@ -373,6 +372,18 @@ class CRM_Activity_BAO_Query {
          $query->_qill[$grouping][] = ts('Activities without Followup Activities');
        }
        break;
+
+
+     case 'followup_parent_id':
+       if ($value == 1) {
+         $query->_where[$grouping][] = "civicrm_activity.parent_id IS NOT NULL";
+         $query->_qill[$grouping][] = ts('Activities which are Followup Activities');
+       }
+       elseif ($value == 2) {
+         $query->_where[$grouping][] = "civicrm_activity.parent_id IS NULL";
+         $query->_qill[$grouping][] = ts('Activities which are not Followup Activities');
+       }
+       break;
       
     case 'activity_campaign_id':
       $campParams = array(
@@ -475,6 +486,7 @@ class CRM_Activity_BAO_Query {
       2 => ts('No'),
     );
     $form->addRadio('parent_id', NULL, $followUpActivity);
+    $form->addRadio('followup_parent_id', NULL, $followUpActivity);
     $form->addRadio('activity_role', NULL, $activityRoles);
     $form->setDefaults(array('activity_role' => 3));
     $activityStatus = CRM_Core_PseudoConstant::activityStatus();

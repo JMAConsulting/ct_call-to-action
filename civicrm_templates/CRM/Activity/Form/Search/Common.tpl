@@ -65,8 +65,7 @@
         {$form.activity_engagement_level.html}
       {/if}
       {if $form.parent_id}
-        <br
-        / >
+        <br/>
         <br/>
         <label>{ts}Has a Followup Activity?{/ts}</label>
         <br/>
@@ -80,6 +79,21 @@
     </span>
       {/if}
     </td>
+<td>
+      {if $form.followup_parent_id}
+        <div style="height:135px"></div>
+        <label>{ts}Is a Followup Activity?{/ts}</label>
+        <br/>
+        {$form.followup_parent_id.html}
+      <span class="crm-clear-link">
+      (<a href="#" title="unselect"
+          onclick="unselectRadio('followup_parent_id', '{$form.formName}');
+            return false;">
+        {ts}clear{/ts}
+      </a>)
+    </span>
+      {/if}
+</td>
   {/if}
 
   {if $form.activity_tags}
