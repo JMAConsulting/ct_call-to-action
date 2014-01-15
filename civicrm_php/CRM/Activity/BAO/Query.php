@@ -271,7 +271,9 @@ class CRM_Activity_BAO_Query {
         else {
           $clause[] = "'" . CRM_Utils_Type::escape($value, 'String') . "'";
         }
-        $query->_where[$grouping][] = ' civicrm_activity.status_id IN (' . implode(',', array_keys($value)) . ')';
+        $query->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("civicrm_activity.status_id",
+          $op, $value, "Integer"
+        );
         $query->_qill[$grouping][] = ts('Activity Status') . ' - ' . implode(' ' . ts('or') . ' ', $clause);
         break;
 
