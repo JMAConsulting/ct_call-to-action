@@ -260,18 +260,30 @@ class CRM_Activity_BAO_Query {
 
       case 'activity_status':
         $status = CRM_Core_PseudoConstant::activityStatus();
-        $clause = array();
+        $clause = $val = array();
         if (is_array($value)) {
           foreach ($value as $k => $v) {
             if ($k) {
-              $clause[] = "'" . CRM_Utils_Type::escape($status[$k], 'String') . "'";
+              $clause[] = CRM_Utils_Type::escape($status[$k], 'String');
+              $val[] = $k;
             }
+          }
+          if (count($val) > 0) {
+            // Overwrite $value so it works with an IN where statement.
+            $op = 'IN';
+            $value = '(' . implode(',', $val) . ')';
+          }
+          else {
+            // If we somehow have an empty array, just return
+            return;
           }
         }
         else {
-          $clause[] = "'" . CRM_Utils_Type::escape($value, 'String') . "'";
+          $clause[] = CRM_Utils_Array::value($value, $status);
         }
-        $query->_where[$grouping][] = ' civicrm_activity.status_id IN (' . implode(',', array_keys($value)) . ')';
+        $query->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("civicrm_activity.status_id",
+          $op, $value, "Integer"
+        );
         $query->_qill[$grouping][] = ts('Activity Status') . ' - ' . implode(' ' . ts('or') . ' ', $clause);
         break;
 
