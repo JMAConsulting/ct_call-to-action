@@ -333,6 +333,14 @@ class CRM_Activity_Form_Search extends CRM_Core_Form {
     if (empty($this->_formValues['activity_test']) && $this->_force) {
       $this->_formValues["activity_test"] = 0;
     }
+   
+    $customFlag = FALSE;
+    if (CRM_Utils_Array::value('custom_15', $this->_formValues) == 'NULL') {
+      $this->_formValues['custom_15'] = '';
+      $customFlag = TRUE;
+    }
+
+    
 
     CRM_Core_BAO_CustomValue::fixFieldValueOfTypeMemo($this->_formValues);
 
@@ -359,6 +367,16 @@ class CRM_Activity_Form_Search extends CRM_Core_Form {
     }
 
     $this->_queryParams = CRM_Contact_BAO_Query::convertFormValues($this->_formValues);
+    
+    if ($customFlag) {
+      $this->_queryParams[]= array(
+        0 => 'custom_15',
+        1 => 'IS NULL',
+        2 => '',
+        3 => 1,
+        4 => 0,
+      );
+    }
 
     $selector = new CRM_Activity_Selector_Search($this->_queryParams,
       $this->_action,
