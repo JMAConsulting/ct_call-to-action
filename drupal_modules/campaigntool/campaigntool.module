@@ -9,22 +9,22 @@ function campaigntool_menu() {
     'description' => 'Use this form to enter in various calls to action (Events, Petitions or Subscriptions)',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('campaigntool_form', 1), 
-    'access argument' => array('calls to action'),
+    'access arguments' => array('calls to action'),
   );
   $items['call-to-action-delete/%'] = array(
     'page callback' => 'campaigntool_cta_delete',
     'page arguments' => array(1), 
-    'access argument' => array('calls to action'),
+    'access arguments' => array('calls to action'),
   );
   $items['call-to-action-disable/%/%'] = array(
     'page callback' => 'campaigntool_cta_disable',
     'page arguments' => array(1, 2),
-    'access argument' => array('calls to action'),
+    'access arguments' => array('calls to action'),
   );
   $items['i18n/%/%/%/%'] = array(
     'page callback' => 'campaigntool_cta_language',
     'page arguments' => array(1, 2, 3, 4),
-    'access argument' => array('calls to action'),
+    'access arguments' => array('calls to action'),
   );
 
   return $items;
