@@ -1164,3 +1164,22 @@ function campaigntool_civicrm_navigationMenu(&$params) {
     }
   }
 }
+
+function campaigntool_node_access($node, $op, $account) {
+  if (is_object($node)) {
+    $bool = (
+      ($node->nid == 279) && 
+      (($op == 'view') || ($op == 'update'))
+    );
+
+    if ($bool) {
+      if (user_access('calls to action')) {
+        return NODE_ACCESS_ALLOW;
+      }
+      else {
+        return NODE_ACCESS_DENY;
+      }
+    }
+  }
+  return NODE_ACCESS_IGNORE;
+}
