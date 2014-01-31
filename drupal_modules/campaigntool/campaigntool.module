@@ -668,6 +668,9 @@ function campaigntool_form_submit($form, &$form_state) {
     $new = TRUE;
     $profile = CRM_Core_BAO_UFGroup::copy($gid);
     $profile->title = $fieldArray[1];
+    if ($params['type'] == 'subscription') {
+      $profile->add_to_group_id = 7;
+    }
     $profile->save();
     $query = "DELETE FROM civicrm_uf_join
 WHERE uf_group_id = {$profile->id} AND module != 'Profile'";
