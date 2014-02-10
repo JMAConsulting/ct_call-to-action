@@ -67,6 +67,14 @@ class CRM_Report_Form_ActivitiesSummary extends CRM_Report_Form {
               'count' => ts('New'),
             ),
           ),
+          'contact_assignee' =>
+          array(
+            'name' => 'sort_name',
+            'alias' => 'civicrm_contact_assignee',
+            'title' => ts('Assignee Contact Name'),
+            'operator' => 'like',
+            'type' => CRM_Report_Form::OP_STRING,
+          ),
         ),
         'filters' =>
         array(
@@ -76,6 +84,14 @@ class CRM_Report_Form_ActivitiesSummary extends CRM_Report_Form {
           array('title' => ts('Activity Type'),
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
             'options' => CRM_Core_PseudoConstant::activityType(TRUE, TRUE, FALSE, 'label', TRUE),
+          ),
+          'current_user' =>
+          array(
+            'name' => 'current_user',
+            'title' => ts('Limit To Current User'),
+            'type' => CRM_Utils_Type::T_INT,
+            'operatorType' => CRM_Report_Form::OP_SELECT,
+            'options' => array('0' => ts('No'), '1' => ts('Yes')),
           ),
         ),
         'group_bys' =>
@@ -228,7 +244,13 @@ class CRM_Report_Form_ActivitiesSummary extends CRM_Report_Form {
              LEFT JOIN civicrm_option_value
                     ON ( {$this->_aliases['civicrm_activity']}.activity_type_id = civicrm_option_value.value )
              LEFT JOIN civicrm_option_group
-                    ON civicrm_option_group.id = civicrm_option_value.option_group_id";
+                    ON civicrm_option_group.id = civicrm_option_value.option_group_id
+             INNER JOIN civicrm_activity_contact cac
+                    ON {$this->_aliases['civicrm_activity']}.id = cac.activity_id AND
+                       cac.record_type_id = 1
+             INNER JOIN civicrm_contact civicrm_contact_assignee
+                    ON cac.contact_id = civicrm_contact_assignee.id
+             {$this->_aclFrom}";
   }
 
   function where() {
@@ -261,6 +283,22 @@ class CRM_Report_Form_ActivitiesSummary extends CRM_Report_Form {
             }
           }
 
+
+          if ($field['name'] == 'current_user') {
+            if (CRM_Utils_Array::value("{$fieldName}_value", $this->_params) == 1) {
+              // get current user
+              $session = CRM_Core_Session::singleton();
+              if ($contactID = $session->get('userID')) {
+                $clause = "civicrm_contact_assignee.id = " . $contactID;
+              }
+              else {
+                $clause = NULL;
+              }
+            }
+            else {
+              $clause = NULL;
+            }
+          }
           if (!empty($clause)) {
             $clauses[] = $clause;
           }
