@@ -976,6 +976,12 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
         'template' => 'CRM/Extra/ModifyTpl.tpl',
       ));
     global $language;
+    if ($language->language=='fr') {
+      $form->_elements[6]->_label = htmlentities('Prénom');
+      $form->_elements[7]->_label = 'Nom';
+      $form->_elements[8]->_label = 'Courriel';
+      $form->_elements[9]->_label = 'Code Postal';
+    }
     switch ($formName) {
       case "CRM_Profile_Form_Edit":
         $afterDivname = '#crm-profile-block';
@@ -990,7 +996,10 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
         $afterDivname = '.crm-petition-activity-profile';
         $eachDivName = '.crm-petition-contact-profile';
         if ($form->getVar('_activityProfileId')) {
-          $form->assign('surveyText', ($language->language=='fr') ? 'Envoyez votre réponse au sondage' : 'Send your Survey');
+          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Envoyez votre reponse au sondage') : 'Send your Survey');
+        }
+        else {
+          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Signez la Petition') : 'Sign the Petition');
         }
         break;
     }
