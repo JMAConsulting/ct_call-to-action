@@ -240,26 +240,51 @@ function campaigntool_cta_disable($action, $status) {
 function campaigntool_cta_delete($action) {
   civicrm_initialize();
   $id = explode('-', $action);
-  if ($id[0] == 'event') {
-    $params = array(
-      'id' => $id[1],
-      'version' => 3,
-    );
-    $result = civicrm_api( 'event','delete',$params );
+
+  if ($id[0] == 'profile') {
+    $profileId = $id[1];    
   }
-  elseif($id[0] == 'petition') {
+  else {
     $params = array(
       'id' => $id[1],
       'version' => 3,
     );
-    $result = civicrm_api( 'survey','delete',$params );
+    $joinParams = array('entity_id' => $id[1]);
+    if ($id[0] == 'petition') {
+      $apiName = 'survey';
+      $joinParams += array(
+        'entity_table' => 'civicrm_survey',
+        'module' => 'CiviCampaign',
+        'weight' => 1,
+      ); 
+      $profileId = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
+      if ($profileId) {
+        $param = array(
+          'id' => $profileId,
+          'version' => 3,
+        );
+        $result = civicrm_api('uf_group', 'delete', $param);
+      }
+      $joinParams['weight'] = 2;
+    }
+    else {
+      $apiName = 'event';
+      $joinParams += array(
+        'entity_table' => 'civicrm_event',
+        'module' => 'CiviEvent',
+      );
+    }
+    
+    $profileId = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
+    civicrm_api($apiName, 'delete', $params);
   }
-  elseif($id[0] == 'profile') {
+
+  if ($profileId) {
     $params = array(
-      'id' => $id[1],
+      'id' => $profileId,
       'version' => 3,
     );
-    $result = civicrm_api( 'uf_group','delete',$params );
+    $result = civicrm_api('uf_group', 'delete', $params);
   }
 
   if ($result) {
