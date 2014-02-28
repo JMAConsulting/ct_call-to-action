@@ -593,8 +593,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     '#type' => 'textfield',
     '#title' => isset($link) ?  t('More Link Text')." <a href='#' id='link-field' data-id='".$actions[1]."' data-table='".$table."' data-field='help_pre' data-row='link'>
 <img src='".$config->resourceBase."i/langs.png'></a>" :  t('More Link Text'),
-    '#default_value' => isset($link) ? $link : ' >> Learn More and Share',
-    '#required' => TRUE,
+    '#default_value' => isset($link) ? $link : NULL,
   ); 
   $form['location_fieldset']['address_hidden'] = array(
     '#type' => 'hidden',
@@ -1024,7 +1023,7 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
           $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Envoyez votre reponse au sondage') : 'Send your Survey');
         }
         else {
-          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Signez la Petition') : 'Sign the Petition');
+          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Signez la petition') : 'Sign the Petition');
         }
         break;
     }
