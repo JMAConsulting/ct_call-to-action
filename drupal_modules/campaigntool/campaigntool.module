@@ -372,7 +372,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
             $fields[] = $ufFields[$key]['help_pre'];
           }
         }
-        $link = $fields[3];
+        // $link = $fields[3];
         $description = $fields[2];
         break;
 
@@ -398,7 +398,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
             $fields[] = $ufFields[$key]['help_pre'];
           }
         }
-        $link = $fields[3];
+        //        $link = $fields[3];
         $summary = $fields[1];
         $title = $fields[0];
         $description = $fields[2];
@@ -429,7 +429,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
             $fields[] = $ufFields[$key]['help_pre'];
           }
         }
-        list($title, $summary, $description, $link) = array_values($fields);
+        list($title, $summary, $description) = array_values($fields);
         $actions[0] = 'subscription';
         $profileId = $actions[1];
         break;
@@ -681,7 +681,7 @@ function campaigntool_form_submit($form, &$form_state) {
     1 => $form_state['values']['title'], //Title
     2 => $form_state['values']['summary'], //Summary
     3 => $form_state['values']['description']['value'], //Description
-    4 => $form_state['values']['link'], //More Link Name
+    //4 => $form_state['values']['link'], //More Link Name
   );
   $ufjoinId = $ufjointable = NULL;
   if (!(CRM_Utils_Array::value('profile_hidden', $form_state['values']) || 
