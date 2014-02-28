@@ -1000,11 +1000,11 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
         'template' => 'CRM/Extra/ModifyTpl.tpl',
       ));
     global $language;
-    if ($language->language=='fr') {
-      $form->_elements[6]->_label = htmlentities('Prénom');
-      $form->_elements[7]->_label = 'Nom';
-      $form->_elements[8]->_label = 'Courriel';
-      $form->_elements[9]->_label = 'Code Postal';
+    if ($language->language=='fr' && isset($form->_elements[6]->_label)) {
+      $form->_elements[5]->_label = htmlentities('Prénom');
+      $form->_elements[6]->_label = 'Nom';
+      $form->_elements[7]->_label = 'Courriel';
+      $form->_elements[8]->_label = 'Code Postal';
     }
     switch ($formName) {
       case "CRM_Profile_Form_Edit":
