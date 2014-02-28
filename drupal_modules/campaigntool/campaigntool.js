@@ -2,7 +2,7 @@
 
   Drupal.behaviors.exampleModule = {
     attach: function (context, settings) {	
-
+        $(".form-item-link").hide();
 	function loadDialog( url, fieldName) {
 	    $.ajax({
 		url: url,
