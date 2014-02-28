@@ -125,3 +125,11 @@ margin-top: -4px !important;
 .page-call-to-action-entry #edit-description-format {
   display:none !important;
 }
+#root-menu-div li span {
+    color: white;
+    cursor: pointer;
+    display: block;
+    font-weight: normal;
+    text-decoration: none;
+}
+
