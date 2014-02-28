@@ -33,6 +33,7 @@ cj(document).ready(function() {
 
  {/literal}{if $surveyText}{literal}
   var buttonText = {/literal}'{$surveyText}'{literal};
+  buttonText = cj('<div />').html(buttonText).text();
   cj('#_qf_Signature_next-bottom').attr('value', buttonText);
  {/literal}{/if}{literal}
 
