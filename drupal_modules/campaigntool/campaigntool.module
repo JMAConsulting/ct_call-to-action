@@ -1023,7 +1023,7 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
           $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Envoyez votre reponse au sondage') : 'Send your Survey');
         }
         else {
-          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Signez la petition') : 'Sign the Petition');
+          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Signez la pétition') : 'Sign the Petition');
         }
         break;
     }
