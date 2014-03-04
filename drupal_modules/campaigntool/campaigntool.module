@@ -1001,10 +1001,10 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
       ));
     global $language;
     if ($language->language=='fr' && isset($form->_elements[6]->_label)) {
-      $form->_elements[5]->_label = htmlentities('Prénom');
-      $form->_elements[6]->_label = 'Nom';
-      $form->_elements[7]->_label = 'Courriel';
-      $form->_elements[8]->_label = 'Code Postal';
+      $form->_elements[6]->_label = htmlentities('Prï¿½nom');
+      $form->_elements[7]->_label = 'Nom';
+      $form->_elements[8]->_label = 'Courriel';
+      $form->_elements[9]->_label = 'Code Postal';
     }
     switch ($formName) {
       case "CRM_Profile_Form_Edit":
@@ -1023,7 +1023,7 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
           $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Envoyez votre reponse au sondage') : 'Send your Survey');
         }
         else {
-          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Signez la pétition') : 'Sign the Petition');
+          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Signez la pï¿½tition') : 'Sign the Petition');
         }
         break;
     }
