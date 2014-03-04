@@ -1,8 +1,7 @@
 (function ($) {
 
   Drupal.behaviors.exampleModule = {
-    attach: function (context, settings) {	
-        $(".form-item-link").hide();
+    attach: function (context, settings) {
 	function loadDialog( url, fieldName) {
 	    $.ajax({
 		url: url,
@@ -34,18 +33,29 @@
 	    $('#address-wrapper').hide();
 	    $('#location-choose-wrapper').hide();
 	    $('.container-inline-date').hide();
+	    $('#edit-link').val('');
 	}
 	$('#edit-action-type').change( function() {
 	    switch($(this).val()) {
 	    case 'event':
 		$('.container-inline-date').show();
 		$('#address-wrapper').show();
+		$('#edit-link').val('');
 		break;
 	    case 'petition':
+		$('#edit-link').val('');
+		$('.container-inline-date').hide();
+		$('#address-wrapper').hide();
+		break;
 	    case 'survey':
+		$('.container-inline-date').hide();
+		$('#address-wrapper').hide();
+		$('#edit-link').val('Send your Survey');
+		break;
 	    case 'subscription':
 		$('.container-inline-date').hide();
 		$('#address-wrapper').hide();
+		$('#edit-link').val('');
 		break;
 	    default:
 		break;
