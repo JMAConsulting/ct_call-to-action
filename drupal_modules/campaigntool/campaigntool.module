@@ -48,6 +48,9 @@ function campaigntool_cta_language_form($form, $form_state, $table, $field, $id,
   if ($table == 'Profile') {
     $field = 'help_pre';
   }
+  if ($field == 'desc') {
+    $field = 'help_pre';
+  }
   $cols = array();
   foreach ($locales as $locale) {
     $cols[] = "{$field}_{$locale} {$locale}";
@@ -68,6 +71,9 @@ function campaigntool_cta_language_form($form, $form_state, $table, $field, $id,
       break;
     case 'link':
       $weight = 4;
+      break;
+    case 'more_desc':
+      $weight = 5;
       break;
   }
   if ($field == 'help_pre' && $table != 'Profile') {
@@ -168,6 +174,9 @@ function campaigntool_cta_language_form_submit($form, &$form_state){
       break;
     case 'link':
       $weight = 4;
+      break;
+    case 'more_desc':
+      $weight = 5;
       break;
   }
   // get uf group id
@@ -398,6 +407,7 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
             $fields[] = $ufFields[$key]['help_pre'];
           }
         }
+        $more = $fields[4];
         $link = $fields[3];
         $summary = $fields[1];
         $title = $fields[0];
@@ -589,6 +599,13 @@ function campaigntool_form($form, &$form_state, $id = NULL) {
     '#default_value' => isset($description) ? $description : NULL,
     '#prefix' => '<div id="locale-dialog_help_pre"></div>',
   );
+  $form['more_desc'] = array(
+    '#type' => 'text_format',
+    '#title' => isset($more) ?  t('More Information')." <a href='#' id='more-desc-field' data-id='".$actions[1]."' data-table='".$table."' data-field='desc' data-row='more_desc'>
+<img src='".$config->resourceBase."i/langs.png'></a>" :  t('More Information'),
+    '#default_value' => isset($more) ? $more : NULL,
+    '#prefix' => '<div id="locale-dialog_desc"></div>',
+  );
   $form['link'] = array(
     '#type' => 'textfield',
     '#title' => isset($link) ?  t('More Link Text')." <a href='#' id='link-field' data-id='".$actions[1]."' data-table='".$table."' data-field='help_pre' data-row='link'>
@@ -682,6 +699,7 @@ function campaigntool_form_submit($form, &$form_state) {
     2 => $form_state['values']['summary'], //Summary
     3 => $form_state['values']['description']['value'], //Description
     4 => $form_state['values']['link'], //More Link Name
+    5 => $form_state['values']['more_desc']['value'], //More Link Name
   );
   $ufjoinId = $ufjointable = NULL;
   if (!(CRM_Utils_Array::value('profile_hidden', $form_state['values']) || 
