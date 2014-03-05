@@ -21,7 +21,7 @@
 	    });
 	}
 
-	$('#title-field, #summary-field, #description-field, #link-field').click( function() {
+	$('#title-field, #summary-field, #description-field, #link-field, #more-desc-field').click( function() {
 	    var id = $(this).data('id');
 	    var table = $(this).data('table');
 	    var field = $(this).data('field');
@@ -33,29 +33,44 @@
 	    $('#address-wrapper').hide();
 	    $('#location-choose-wrapper').hide();
 	    $('.container-inline-date').hide();
-	    $('#edit-link').val('');
+	}        
+	if ($('#edit-action-type').val() == 'survey' || $('#edit-action-type').val() == 'petition') {
+	    $('.form-item-more-desc-value').show();
+	    $('#switch_edit-more-desc-value').show();
 	}
+	else {
+	    $('.form-item-more-desc-value').hide();
+	    $('#switch_edit-more-desc-value').hide();
+            $('#edit-link').val('');
+	} 
 	$('#edit-action-type').change( function() {
 	    switch($(this).val()) {
 	    case 'event':
 		$('.container-inline-date').show();
 		$('#address-wrapper').show();
 		$('#edit-link').val('');
+		$('.form-item-more-desc-value').hide();
+		$('#switch_edit-more-desc-value').hide();
 		break;
 	    case 'petition':
 		$('#edit-link').val('');
 		$('.container-inline-date').hide();
 		$('#address-wrapper').hide();
+		$('.form-item-more-desc-value').hide();
+		$('#switch_edit-more-desc-value').hide();
 		break;
 	    case 'survey':
 		$('.container-inline-date').hide();
 		$('#address-wrapper').hide();
 		$('#edit-link').val('Send your Survey');
+		$('.form-item-more-desc-value').show();
 		break;
 	    case 'subscription':
 		$('.container-inline-date').hide();
 		$('#address-wrapper').hide();
 		$('#edit-link').val('');
+		$('.form-item-more-desc-value').hide();
+		$('#switch_edit-more-desc-value').hide();
 		break;
 	    default:
 		break;
