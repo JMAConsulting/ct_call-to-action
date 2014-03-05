@@ -44,7 +44,7 @@ cj(document).ready(function() {
     after = '.profileDiv';
   }
   cj("<div class='newDiv'></div>").insertAfter(after);
-  var formattings = new Array("", "title", "summaryp", "descriptionp", "morelink");
+  var formattings = new Array("", "title", "summaryp", "descriptionp", "morelink", "descriptionp");
   var count = 1; 
   cj(eachdiv).each(function(index) {
     var className = cj(this).attr('class');
