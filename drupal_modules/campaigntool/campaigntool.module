@@ -1018,21 +1018,18 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
         'template' => 'CRM/Extra/ModifyTpl.tpl',
       ));
     global $language;
-    if ($language->language=='fr' && isset($form->_elements[7]->_label)) {
-      $form->_elements[7]->_label = 'Prénom';
-      $form->_elements[8]->_label = 'Nom';
-      $form->_elements[9]->_label = 'Courriel';
-      $form->_elements[10]->_label = 'Code Postal';
-    }
     switch ($formName) {
       case "CRM_Profile_Form_Edit":
         $afterDivname = '#crm-profile-block';
         $eachDivName = '#crm-profile-block';
+        $form->assign('buttonText', ($language->language=='fr') ? 'Abonnez-vous' : 'Subscribe Now');
+        $element_num = 7;
         break;
       case "CRM_Event_Form_Registration_Register":
         $afterDivname = '#billing-payment-block';
         $eachDivName = '.crm-profile';
         $form->assign('buttonText', ($language->language=='fr') ? 'Inscrivez-vous' : 'Register Now');
+        $element_num = 6;
         break;
       case "CRM_Campaign_Form_Petition_Signature":
         $afterDivname = '.crm-petition-activity-profile';
@@ -1043,10 +1040,18 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
         else {
           $form->assign('surveyText', ($language->language=='fr') ? 'Signez la pétition' : 'Sign the Petition');
         }
+        $element_num = 7;
         break;
     }
     $form->assign('afterdiv', $afterDivname);
     $form->assign('eachdiv', $eachDivName);
+
+    if ($language->language=='fr' && isset($form->_elements[$element_num]->_label)) {
+      $form->_elements[$element_num]->_label = 'Prénom';
+      $form->_elements[$element_num + 1]->_label = 'Nom';
+      $form->_elements[$element_num + 2]->_label = 'Courriel';
+      $form->_elements[$element_num + 3]->_label = 'Code Postal';
+    }
   } 
 }
 
