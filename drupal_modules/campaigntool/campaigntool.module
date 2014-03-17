@@ -1018,11 +1018,11 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
         'template' => 'CRM/Extra/ModifyTpl.tpl',
       ));
     global $language;
-    if ($language->language=='fr' && isset($form->_elements[6]->_label)) {
-      $form->_elements[6]->_label = htmlentities('Pr�nom');
-      $form->_elements[7]->_label = 'Nom';
-      $form->_elements[8]->_label = 'Courriel';
-      $form->_elements[9]->_label = 'Code Postal';
+    if ($language->language=='fr' && isset($form->_elements[7]->_label)) {
+      $form->_elements[7]->_label = 'Prénom';
+      $form->_elements[8]->_label = 'Nom';
+      $form->_elements[9]->_label = 'Courriel';
+      $form->_elements[10]->_label = 'Code Postal';
     }
     switch ($formName) {
       case "CRM_Profile_Form_Edit":
@@ -1038,10 +1038,10 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
         $afterDivname = '.crm-petition-activity-profile';
         $eachDivName = '.crm-petition-contact-profile';
         if ($form->getVar('_activityProfileId')) {
-          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Envoyez votre reponse au sondage') : 'Send your Survey');
+          $form->assign('surveyText', ($language->language=='fr') ? 'Soumettre vos réponses' : 'Send your Survey');
         }
         else {
-          $form->assign('surveyText', ($language->language=='fr') ? htmlentities('Signez la p�tition') : 'Sign the Petition');
+          $form->assign('surveyText', ($language->language=='fr') ? 'Signez la pétition' : 'Sign the Petition');
         }
         break;
     }
