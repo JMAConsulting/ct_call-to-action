@@ -31,6 +31,11 @@ cj(document).ready(function() {
   cj('#_qf_Register_upload-bottom').attr('value', button);
  {/literal}{/if}{literal}
 
+ {/literal}{if $profileButtonText}{literal}
+  var button = {/literal}'{$profileButtonText}'{literal};
+  cj('#_qf_Edit_next').attr('value', button);
+ {/literal}{/if}{literal}
+
  {/literal}{if $surveyText}{literal}
   var buttonText = {/literal}'{$surveyText}'{literal};
   buttonText = cj('<div />').html(buttonText).text();
