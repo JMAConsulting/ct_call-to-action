@@ -1022,7 +1022,7 @@ cj('.crm-activity-form-block-activity_type_id select').change(function() {
       case "CRM_Profile_Form_Edit":
         $afterDivname = '#crm-profile-block';
         $eachDivName = '#crm-profile-block';
-        $form->assign('buttonText', ($language->language=='fr') ? 'Abonnez-vous' : 'Subscribe Now');
+        $form->assign('profileButtonText', ($language->language=='fr') ? 'Abonnez-vous' : 'Subscribe Now');
         $element_num = 7;
         break;
       case "CRM_Event_Form_Registration_Register":
