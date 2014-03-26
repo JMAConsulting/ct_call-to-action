@@ -957,6 +957,23 @@ function campaigntool_civicrm_pageRun( &$page ) {
         'markup' => '<p class="ical-description">Download the iCal entry or iCal feed for this event.</p>',
       ));
   }
+
+  if ($page->getVar('_name') == 'CRM_Campaign_Page_Petition_ThankYou') {
+    $joinParams = array(
+      'entity_id' => $page->petition['id'],
+      'entity_table' => 'civicrm_survey',
+      'weight' => 2,
+      'module' => 'CiviCampaign',
+    );
+    $ufGroupId = CRM_Core_BAO_UFJoin::findUFGroupId($joinParams);
+    $ufFields = CRM_Core_BAO_UFGroup::getFields($ufGroupId);
+    foreach($ufFields as $key => $value) {
+      if (stristr($key, 'formatting_')) {
+        $page->assign('petitionTitle', $ufFields[$key]['help_pre']);
+        break;
+      }
+    }
+  }
 }
 
 function campaigntool_civicrm_buildForm($formName, &$form) { 
